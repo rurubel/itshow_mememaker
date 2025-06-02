@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './MemeMakerApp.css';
 import mainBg from './assets/main_bg.png';
-
+import logo from './assets/logo.png';
 
 function MemeMakerApp() {
   const [showOverlay, setShowOverlay] = useState(true);
@@ -19,7 +19,7 @@ function MemeMakerApp() {
     };
 
     window.addEventListener('scroll', handleScroll);
-    handleScroll(); // 초기 상태 설정
+    handleScroll();
 
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -32,11 +32,12 @@ function MemeMakerApp() {
 
   return (
     <div className="MemeMakerApp">
-      <img
-      src={mainBg}
-      alt="배경"
-      className="main_bg"
-    />
+      <img src={mainBg} alt="배경" className="main_bg" />
+      <nav className="navbar">
+        <img src={logo} alt="로고" className="logo"/>
+        <div className="nav-links">만들기 / 다른 사람의 짤</div>
+      </nav>
+      <div className="main_text">누구나 쉽게 짤 만들기</div>
       {showScrollHint && (
         <div className="scroll-hint">화면을 아래로 스크롤해주세요</div>
       )}
@@ -46,6 +47,7 @@ function MemeMakerApp() {
           맨 위로
         </button>
       )}
+      <div style={{ height: '200vh' }}></div>
     </div>
   );
 }

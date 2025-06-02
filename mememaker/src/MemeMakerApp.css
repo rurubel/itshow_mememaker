@@ -1,11 +1,16 @@
-body, html, #root, .App {
+body, html, #root {
   margin: 0;
+  padding: 0;
   height: 100%;
   font-family: sans-serif;
   overflow-x: hidden;
 }
 
-/* ✅ 배경 이미지 스타일 */
+.MemeMakerApp {
+  position: relative;
+  min-height: 200vh;
+}
+
 .main_bg {
   position: fixed;
   top: 0;
@@ -13,24 +18,59 @@ body, html, #root, .App {
   width: 100vw;
   height: 100vh;
   object-fit: cover;
-  z-index: -1; /* 배경이 맨 뒤로 */
+  opacity: 0.3;
+  z-index: -1;
   pointer-events: none;
 }
 
-/* 스크롤 힌트 */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 15px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: white;
+  z-index: 100;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.logo {
+  width: 150px;
+  height: 80px;
+}
+
+.nav-links {
+  padding-right: 70px;
+  font-size: 20px;
+  color: #7D6D6D;
+}
+
+.main_text {
+  position: absolute;
+  top: 40vh;
+  width: 100%;
+  text-align: center;
+  font-size: 4em;
+  font-weight: bold;
+  color: #574141;
+  z-index: 5;
+}
+
 .scroll-hint {
   position: fixed;
   bottom: 10px;
   width: 100%;
   text-align: center;
   color: white;
-  font-size: 1.5em;
+  font-size: 2.7em;
   pointer-events: none;
   animation: fadeInOut 2s infinite;
   z-index: 1000;
 }
 
-/* 하단 오버레이 */
 .bottom-overlay {
   position: fixed;
   bottom: 0;
@@ -43,7 +83,6 @@ body, html, #root, .App {
   z-index: 10;
 }
 
-/* 맨 위로 버튼 */
 .top-button {
   position: fixed;
   bottom: 20px;
@@ -57,7 +96,6 @@ body, html, #root, .App {
   z-index: 20;
 }
 
-/* 애니메이션 */
 @keyframes darkenLighten {
   0% { background: rgba(0, 0, 0, 0); }
   50% { background: rgba(0, 0, 0, 0.2); }
