@@ -1,7 +1,7 @@
 body, html, #root {
   margin: 0;
   padding: 0;
-  height: 100%;
+  height: auto;
   font-family: sans-serif;
   overflow-x: hidden;
 }
@@ -79,7 +79,7 @@ body, html, #root {
   font-size: 2em;
   pointer-events: none;
   animation: fadeInOut 2s infinite;
-  z-index: 10;
+  z-index: 15;
   transition: opacity 0.5s ease;
 }
 
@@ -97,14 +97,15 @@ body, html, #root {
 }
 
 .scroll-hint.hidden,
-.bottom-overlay.hidden {
+.bottom-overlay.hidden{
   opacity: 0;
   animation: none;
   pointer-events: none;
+  display: none;
 }
 
 .scroll-hint.visible,
-.bottom-overlay.visible {
+.bottom-overlay.visible{
   opacity: 1;
 }
 
@@ -120,7 +121,7 @@ body, html, #root {
   100% { background: rgba(0, 0, 0, 0); }
 }
 
-.second-page {
+.make-page1 {
   height: 100vh;
   background: white;
   padding: 50px 20px;

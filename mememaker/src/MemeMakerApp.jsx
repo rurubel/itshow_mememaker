@@ -5,21 +5,29 @@ import logo from './assets/logo.png';
 
 function MemeMakerApp() {
   const [showScrollHint, setShowScrollHint] = useState(true);
+  const [toMakePage, setMakePage] = useState(false);
+  const [toSeePage, setPage] = useState(false);
   const [showTopButton, setShowTopButton] = useState(false);
 
   useEffect(() => {
+  setTimeout(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, 0);
+}, []);
+
+  useEffect(() => {
     const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const atBottom = window.innerHeight + scrollY >= document.body.scrollHeight - 5;
-
-      setShowScrollHint(scrollY < 50);
-      setShowTopButton(atBottom);
-    };
-
+      console.log(window.scrollY);
+       if(window.scrollY >= 1){
+          setShowScrollHint(false);
+      }else{
+          setShowScrollHint(true);
+      }
+  };
     window.addEventListener('scroll', handleScroll);
-    handleScroll();
-
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   const scrollToTop = () => {
@@ -42,7 +50,7 @@ function MemeMakerApp() {
         <div className={`bottom-overlay ${showScrollHint ? 'visible' : 'hidden'}`} />
       </section>
 
-      <section className="second-page">
+      <section className="make-page1">
         <div className="second_text">
           만들고 싶은 이미지를 선택해<br />지금 바로 시작하세요
         </div>
