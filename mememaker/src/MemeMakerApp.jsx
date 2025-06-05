@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import './MemeMakerApp.css';
 import mainBg from './assets/main_bg.png';
 import logo from './assets/logo.png';
+import uproad from './assets/btn_uproad.png'
 
 function MemeMakerApp() {
   const [showScrollHint, setShowScrollHint] = useState(true);
@@ -103,7 +104,19 @@ function MemeMakerApp() {
           </div>
         </div>
       </section>
+
+      <section className="make-page3">
+        <div className="fourth-text">내 사진도 사용할 수 있어요</div>
+        <div className="custom-upload-row">
+          <img src="강아지_샘플_URL" alt="샘플" className="custom-image" />
+        <div className="upload-box">
+          <img src={uproad} alt="업로드" className="btn_uproad" />
+        <span>UPLOAD</span>
     </div>
+  </div>
+</section>
+
+    </div>/* 전체 */
   );
 }
 
