@@ -122,7 +122,7 @@ body, html, #root {
 }
 
 .make-page1 {
-  height: 100vh;
+  height:84vh;
   background: white;
   padding: 50px 20px;
   text-align: center;
@@ -160,8 +160,8 @@ body, html, #root {
   font-size: 30px;
   color: #413333;
   text-align: right;
-  margin-top: 100px;
-  margin-right: 40px;
+  margin-top: 110px;
+  margin-right: 60px;
   cursor: pointer;
 }
 
@@ -176,4 +176,48 @@ body, html, #root {
   border-radius: 5px;
   cursor: pointer;
   z-index: 20;
+}
+
+.make-page2 {
+  height: 86vh;
+  padding: 40px;
+  display: flex;
+  flex-direction: row;
+  background-color: #F6F4F4;
+  border-top: 1px solid #ccc;
+  align-items: flex-start;
+}
+
+.third-text {
+  width: 515px;
+  font-size: 45px;
+  margin-left: 20px;
+  color: #361717;
+  font-weight: bold;
+  line-height: 1.6;
+}
+
+.category-table {
+  margin-top: 25px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  border: 1px solid #ccc;
+}
+
+.category-head,
+.category-btm {
+  display: flex;
+  width: 100%;
+}
+
+.category-cell{
+  flex: 1;
+  border: 1px solid #ccc;
+  padding: 16px;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
 }
