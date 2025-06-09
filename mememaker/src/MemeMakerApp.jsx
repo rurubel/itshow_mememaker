@@ -2,15 +2,28 @@ import React, { useEffect, useState } from 'react';
 import './MemeMakerApp.css';
 import mainBg from './assets/main_bg.png';
 import logo from './assets/logo.png';
-import uproad from './assets/btn_uproad.png'
+import uproad from './assets/btn_uproad.png';
+import axios from 'axios';
 
 function MemeMakerApp() {
   const [showScrollHint, setShowScrollHint] = useState(true);
   const [toMakePage, setMakePage] = useState(false);
   const [toSeePage, setSeePage] = useState(false);
-  const [showTopButton, setShowTopButton] = useState(false);
+  const [imageUrls, setImageUrls] = useState([]);
+
+  const getImages = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/images');
+      console.log(response.data);
+      setImageUrls(response.data);
+      console.log('옹?');
+    } catch (error) {
+      console.error('이미지 불러오기 실패:', error);
+    }
+  };
 
   useEffect(() => {
+    getImages();
     setTimeout(() => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }, 0);
@@ -41,6 +54,7 @@ function MemeMakerApp() {
 
   const ToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    getImages();
   };
 
   const ToMakePage = () => {
@@ -79,11 +93,14 @@ function MemeMakerApp() {
         <div className="second_text">
           만들고 싶은 이미지를 선택해<br />지금 바로 시작하세요
         </div>
-        <div className="image-grid">
-          <div className="image-box" />
-          <div className="image-box" />
-          <div className="image-box" />
-        </div>
+         <div className="image-grid">
+  {imageUrls.map((image, index) => (
+    <div key={index} className="image-box">
+      <img src={image.url} alt={`meme-${index}`} className="image" />
+    </div>
+  ))}
+</div>
+
         <div className="more_text" onClick={ToCategoryPage}>더 많은 사진 ⬇</div>
       </section>
 
@@ -108,15 +125,13 @@ function MemeMakerApp() {
       <section className="make-page3">
         <div className="fourth-text">내 사진도 사용할 수 있어요</div>
         <div className="custom-upload-row">
-          <img src="강아지_샘플_URL" alt="샘플" className="custom-image" />
         <div className="upload-box">
           <img src={uproad} alt="업로드" className="btn_uproad" />
-        <span>UPLOAD</span>
     </div>
   </div>
 </section>
 
-    </div>/* 전체 */
+    </div>
   );
 }
 
