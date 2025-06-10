@@ -93,11 +93,11 @@ function MemeMakerApp() {
         <div className="second_text">
           만들고 싶은 이미지를 선택해<br />지금 바로 시작하세요
         </div>
-         <div className="image-grid">
+          <div className="image-grid">
           {imageUrls.map((image, index) => (
             <div key={index} className="image-box">
-            <img src={image.url} alt={`meme-${index}`} className="image" />
-      </div>
+        <img src={image.imgURL} alt={`meme-${image.temId}`} className="image" />
+    </div>
   ))}
 </div>
 

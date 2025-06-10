@@ -12,6 +12,5 @@ app.use(cors());
 app.use('/images', imageRoutes);
 
 app.listen(PORT, () => {
-  console.log(process.env.S3_BUCKET_NAME);
   console.log(`서버가 열립니다. http://localhost:${PORT}`);
 });
