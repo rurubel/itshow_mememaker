@@ -145,6 +145,7 @@ body, html, #root {
 
 .image-box {
   padding: 10px;
+  margin: 50px;
   background-color: white;
   border: 1px solid #ccc;
   border-radius: 8px;
@@ -161,8 +162,8 @@ body, html, #root {
 }
 
 .image {
-  max-width: 100%;
-  max-height: 100%;
+  max-width: 700px;
+  max-height: 600px;
   object-fit: contain;
 }
 
