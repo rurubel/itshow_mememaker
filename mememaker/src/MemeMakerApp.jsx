@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './MemeMakerApp.css';
 import mainBg from './assets/main_bg.png';
 import logo from './assets/logo.png';
@@ -8,12 +9,13 @@ import axios from 'axios';
 function MemeMakerApp() {
   const [showScrollHint, setShowScrollHint] = useState(true);
   const [toMakePage, setMakePage] = useState(false);
-  const [toSeePage, setSeePage] = useState(false);
+  //const [toSeePage, setSeePage] = useState(false);
   const [ranimageUrls, setranImageUrls] = useState([]);
   const [imageUrls, setImageUrls] = useState([]);
   const [uploadedImage, setUploadedImage] = useState(null);
+  
   const fileInputRef = useRef(null)
-
+  const navigate = useNavigate();
   const cute = imageUrls.filter(img => img.categori === '#귀여운');
   const funny = imageUrls.filter(img => img.categori === '#재밌는');
   const template = imageUrls.filter(img => img.categori === '#템플릿');
@@ -35,6 +37,10 @@ function MemeMakerApp() {
     console.error('전체 이미지 불러오기 실패:', error);
   }
   };
+
+  const ToEditPage = (img) => {
+    navigate('/edit', { state: { img } });
+  }
 
   const upload = () => {
     fileInputRef.current.click();
@@ -132,11 +138,11 @@ function MemeMakerApp() {
           만들고 싶은 이미지를 선택해<br />지금 바로 시작하세요
         </div>
           <div className="image-grid">
-          {ranimageUrls.map((image, index) => (
-            <div key={index} className="image-box">
-        <img src={image.imgURL} alt={`meme-${image.temId}`} className="image" />
-    </div>
-  ))}
+          {ranimageUrls.map((img, index) => (
+            <div key={index} className="image-box" onClick={() => ToEditPage(img)}>
+              <img src={img.imgURL} alt={`meme-${img.temId}`} className="image" />
+            </div>
+          ))}
 </div>
 
         <div className="more_text" onClick={ToCategoryPage}>더 많은 사진 ⬇</div>
@@ -156,21 +162,21 @@ function MemeMakerApp() {
             <div className="category-cell category-box">
               <div className="category-images">
                 {cute.map((img, i) => (
-                  <img key={i} src={img.imgURL} alt={`cute-${img.temId}`} />
+                  <img key={i} src={img.imgURL} alt={`cute-${img.temId}`} onClick={() => ToEditPage(img)} />
                 ))}
               </div>
             </div>
             <div className="category-cell category-box">
               <div className="category-images">
                 {funny.map((img, i) => (
-                  <img key={i} src={img.imgURL} alt={`funny-${img.temId}`} />
+                  <img key={i} src={img.imgURL} alt={`funny-${img.temId}`} onClick={() => ToEditPage(img)} />
                 ))}
               </div>
             </div>
             <div className="category-cell category-box">
               <div className="category-images">
                 {template.map((img, i) => (
-                  <img key={i} src={img.imgURL} alt={`template-${img.temId}`} />
+                  <img key={i} src={img.imgURL} alt={`template-${img.temId}`} onClick={() => ToEditPage(img)} />
                 ))}
               </div>
             </div>
@@ -193,7 +199,7 @@ function MemeMakerApp() {
               <div className="uproad-text">이 사진으로 결정할까요?</div>
               <div className="button-group">
                 <button className="reset-btn" onClick={reset}>다시 선택</button>
-                <button className="confirm-btn">선택 완료</button>
+                <button className="confirm-btn" onClick={() => ToEditPage({ imgURL: uploadedImage, temId: 'uproad', categori: '#내사진' })}>선택 완료</button>
               </div>
             </>
           )}
