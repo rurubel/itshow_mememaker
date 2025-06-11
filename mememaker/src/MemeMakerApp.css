@@ -146,8 +146,8 @@ body, html, #root {
 .image-box {
   padding: 10px;
   margin: 3%;
-  width: 20%;
-  height: 20%;
+  width: 18%;
+  height: 18%;
   background-color: white;
   border: 1px solid #ccc;
   border-radius: 8px;
@@ -173,7 +173,7 @@ body, html, #root {
   font-size: 30px;
   color: #413333;
   text-align: right;
-  margin-top: 160px;
+  margin-top: 3%;
   margin-right: 60px;
   cursor: pointer;
 }
@@ -202,9 +202,10 @@ body, html, #root {
 }
 
 .third-text {
-  width: 515px;
+  width: 25%;
   font-size: 45px;
   margin-left: 20px;
+  margin-top: 20px;
   color: #361717;
   font-weight: bold;
   line-height: 1.6;
@@ -212,28 +213,65 @@ body, html, #root {
 
 .category-table {
   margin-top: 25px;
+  margin-left: 50px;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  border: 1px solid #ccc;
+  width: 98%;
 }
 
 .category-head,
 .category-btm {
   display: flex;
-  width: 100%;
+  width: 98%;
+  height: 100%;
 }
 
-.category-cell{
+
+.category-cell {
   flex: 1;
   border: 1px solid #ccc;
   padding: 16px;
   text-align: center;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  justify-content: flex-start;
   align-items: center;
   font-weight: bold;
+  box-sizing: border-box;
+  overflow: hidden;
 }
+
+.category-box {
+  width: 100%;
+  height: 1000px;
+  flex-grow: 1;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.category-images {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  height: 18%;
+}
+
+.category-images img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.category-images img:hover {
+  transform: scale(1.05);
+}
+
 
 .make-page3 {
   padding: 60px 20px;

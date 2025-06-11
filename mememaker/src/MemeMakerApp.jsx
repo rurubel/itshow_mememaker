@@ -9,21 +9,34 @@ function MemeMakerApp() {
   const [showScrollHint, setShowScrollHint] = useState(true);
   const [toMakePage, setMakePage] = useState(false);
   const [toSeePage, setSeePage] = useState(false);
+  const [ranimageUrls, setranImageUrls] = useState([]);
   const [imageUrls, setImageUrls] = useState([]);
 
-  const getImages = async () => {
+  const cute = imageUrls.filter(img => img.categori === '#귀여운');
+  const funny = imageUrls.filter(img => img.categori === '#재밌는');
+  const template = imageUrls.filter(img => img.categori === '#템플릿');
+
+  const getRandomImages = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/images');
-      console.log(response.data);
-      setImageUrls(response.data);
-      console.log('옹?');
+      const response = await axios.get('http://localhost:5000/meme/random');
+      setranImageUrls(response.data);
     } catch (error) {
-      console.error('이미지 불러오기 실패:', error);
+      console.error('랜덤 이미지 불러오기 실패:', error);
     }
   };
 
+  const getAllImages = async () => {
+  try {
+    const response = await axios.get('http://localhost:5000/meme/all');
+    setImageUrls(response.data);
+  } catch (error) {
+    console.error('전체 이미지 불러오기 실패:', error);
+  }
+};
+
   useEffect(() => {
-    getImages();
+    getRandomImages();
+    getAllImages();
     setTimeout(() => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }, 0);
@@ -31,7 +44,6 @@ function MemeMakerApp() {
 
   useEffect(() => {
     const handleScroll = () => {
-      console.log(window.scrollY);
       if (window.scrollY >= 1) {
         setShowScrollHint(false);
       } else {
@@ -54,7 +66,7 @@ function MemeMakerApp() {
 
   const ToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    getImages();
+    getRandomImages();
   };
 
   const ToMakePage = () => {
@@ -94,7 +106,7 @@ function MemeMakerApp() {
           만들고 싶은 이미지를 선택해<br />지금 바로 시작하세요
         </div>
           <div className="image-grid">
-          {imageUrls.map((image, index) => (
+          {ranimageUrls.map((image, index) => (
             <div key={index} className="image-box">
         <img src={image.imgURL} alt={`meme-${image.temId}`} className="image" />
     </div>
@@ -115,9 +127,27 @@ function MemeMakerApp() {
             <div className="category-cell">#템플릿</div>
           </div>
           <div className="category-btm">
-            <div className="category-cell"><div className="category_image" /></div>
-            <div className="category-cell"><div className="category_image" /></div>
-            <div className="category-cell"><div className="category_image" /></div>
+            <div className="category-cell category-box">
+              <div className="category-images">
+                {cute.map((img, i) => (
+                  <img key={i} src={img.imgURL} alt={`cute-${img.temId}`} />
+                ))}
+              </div>
+            </div>
+            <div className="category-cell category-box">
+              <div className="category-images">
+                {funny.map((img, i) => (
+                  <img key={i} src={img.imgURL} alt={`funny-${img.temId}`} />
+                ))}
+              </div>
+            </div>
+            <div className="category-cell category-box">
+              <div className="category-images">
+                {template.map((img, i) => (
+                  <img key={i} src={img.imgURL} alt={`template-${img.temId}`} />
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
