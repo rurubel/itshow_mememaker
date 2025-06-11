@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import './MemeMakerApp.css';
 import mainBg from './assets/main_bg.png';
 import logo from './assets/logo.png';
@@ -11,6 +11,8 @@ function MemeMakerApp() {
   const [toSeePage, setSeePage] = useState(false);
   const [ranimageUrls, setranImageUrls] = useState([]);
   const [imageUrls, setImageUrls] = useState([]);
+  const [uploadedImage, setUploadedImage] = useState(null);
+  const fileInputRef = useRef(null)
 
   const cute = imageUrls.filter(img => img.categori === '#귀여운');
   const funny = imageUrls.filter(img => img.categori === '#재밌는');
@@ -32,7 +34,29 @@ function MemeMakerApp() {
   } catch (error) {
     console.error('전체 이미지 불러오기 실패:', error);
   }
-};
+  };
+
+  const upload = () => {
+    fileInputRef.current.click();
+  };
+
+  const reset = () => {
+    fileInputRef.current.click();
+  };
+
+  const fileChange = (e) => {
+    const file = e.target.files[0];
+    if (file && (file.type === 'image/png' || file.type === 'image/jpeg')) {
+      const imageURL = URL.createObjectURL(file);
+      setUploadedImage(imageURL);
+    }
+    else if(!file){
+      return;
+    }
+    else {
+      alert('PNG 또는 JPG 이미지만 사용할 수 있습니다.');
+    }
+  };
 
   useEffect(() => {
     getRandomImages();
@@ -67,6 +91,8 @@ function MemeMakerApp() {
   const ToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     getRandomImages();
+    setUploadedImage(null);
+    fileInputRef.current.value = null;
   };
 
   const ToMakePage = () => {
@@ -154,13 +180,33 @@ function MemeMakerApp() {
 
       <section className="make-page3">
         <div className="fourth-text">내 사진도 사용할 수 있어요</div>
-        <div className="custom-upload-row">
-        <div className="upload-box">
-          <img src={uproad} alt="업로드" className="btn_uproad" />
-    </div>
-  </div>
+        <div className="custom-upload">
+         <div className="upload-box" onClick={!uploadedImage ? upload : undefined}>
+          {!uploadedImage ? (
+            <>
+              <img src={uproad} alt="업로드" className="btn_uproad" />
+              <div className="uproad-text">클릭해서 이미지를 업로드 해주세요</div>
+            </>
+          ) : (
+            <>
+              <img src={uploadedImage} alt="업로드된 이미지" className="btn_uproad" />
+              <div className="uproad-text">이 사진으로 결정할까요?</div>
+              <div className="button-group">
+                <button className="reset-btn" onClick={reset}>다시 선택</button>
+                <button className="confirm-btn">선택 완료</button>
+              </div>
+            </>
+          )}
+          <input
+            type="file"
+            accept="image/png, image/jpeg"
+            style={{ display: 'none' }}
+            ref={fileInputRef}
+            onChange={fileChange}
+          />
+        </div>
+      </div>
 </section>
-
     </div>
   );
 }
