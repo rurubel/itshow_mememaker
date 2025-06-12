@@ -296,6 +296,13 @@ body, html, #root {
   gap: 40px;
 }
 
+.explain{
+  position:absolute;
+  float: left;
+  margin-top: 5%;
+}
+
+
 .custom-image {
   width: 180px;
   height: auto;
@@ -304,8 +311,8 @@ body, html, #root {
 }
 
 .btn_uproad {
-  max-width: 500px;
-  max-height: 500px;
+  max-width: 450px;
+  max-height: 450px;
   margin-top: 10%;
   display: flex;
   flex-direction: column;

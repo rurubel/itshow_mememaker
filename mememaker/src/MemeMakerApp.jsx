@@ -4,6 +4,7 @@ import './MemeMakerApp.css';
 import mainBg from './assets/main_bg.png';
 import logo from './assets/logo.png';
 import uproad from './assets/btn_uproad.png';
+import explain from './assets/explain.gif';
 import axios from 'axios';
 
 function MemeMakerApp() {
@@ -186,6 +187,12 @@ function MemeMakerApp() {
 
       <section className="make-page3">
         <div className="fourth-text">내 사진도 사용할 수 있어요</div>
+          {!uploadedImage && (
+            <div className="explain">
+              <img src={explain} alt="설명" className="explain" />
+                </div>
+            )}
+        
         <div className="custom-upload">
          <div className="upload-box" onClick={!uploadedImage ? upload : undefined}>
           {!uploadedImage ? (
