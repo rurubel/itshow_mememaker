@@ -144,7 +144,7 @@ function MemeMakerApp() {
               <img src={img.imgURL} alt={`meme-${img.temId}`} className="image" />
             </div>
           ))}
-</div>
+      </div>
 
         <div className="more_text" onClick={ToCategoryPage}>더 많은 사진 ⬇</div>
       </section>
@@ -190,7 +190,7 @@ function MemeMakerApp() {
           {!uploadedImage && (
             <div className="explain">
               <img src={explain} alt="설명" className="explain" />
-                </div>
+              </div>
             )}
         
         <div className="custom-upload">
@@ -217,9 +217,9 @@ function MemeMakerApp() {
             ref={fileInputRef}
             onChange={fileChange}
           />
+          </div>
         </div>
-      </div>
-</section>
+      </section>
     </div>
   );
 }

@@ -106,8 +106,8 @@
   cursor: zoom-in;
 }
 
-.button-group {
-  margin: 35% auto 0 46%;
+.btn-group {
+  margin: 34% auto 0 46%;
   display: flex;
   gap: 20px;
   justify-content: center;
@@ -150,4 +150,37 @@
   font-size: 20px;
   font-weight: bold;
   color: #5B3A29;
+}
+
+.btn-text{
+  margin-left: 24px;
+}
+
+.text-box {
+  outline: none;
+  cursor: text;
+  font-family: 'Arial', sans-serif;
+}
+
+.text-edit {
+  position: fixed;
+  bottom: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  display: flex;
+  gap: 10px;
+}
+
+.btn-chat{
+  margin-left: 24px;
+}
+.btn-rotate{
+  margin-right: 1px;
+}
+.btn-blank{
+  margin-left: 20px;
 }
