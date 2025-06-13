@@ -3,11 +3,14 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import './MemeMakerEditPage.css';
 import axios from 'axios';
 import help from './assets/help.png';
-import discription from './assets/sqchat.png';
 import addtext from './assets/add-text.png';
 import addchat from './assets/add-chat.png';
 import rotate from './assets/rotate.png';
 import addblank from './assets/add-blank.png';
+import up from './assets/up.png';
+import down from './assets/down.png';
+import left from './assets/left.png';
+import right from './assets/right.png';
 
 function MemeMakerEditPage() {
   const location = useLocation();
@@ -19,9 +22,15 @@ function MemeMakerEditPage() {
   const [imageUrls, setImageUrls] = useState([]);
   const [addStack, setAddStack] = useState([]);
   const [texts, setTexts] = useState([]);
-  const [draggingId, setDraggingId] = useState(null);
-  const [dragStart, setDragStart] = useState(null);
   const [selectedText, setSelectedText] = useState(null);
+  const [rotation, setRotation] = useState(0);
+  const [showDirectionSelector, setShowDirectionSelector] = useState(false);
+  const [blankDirection, setBlankDirection] = useState(null);
+  const [paddingUp, setPaddingUp] = useState(0);
+  const [paddingDown, setPaddingDown] = useState(0);
+  const [paddingLeft, setPaddingLeft] = useState(0);
+  const [paddingRight, setPaddingRight] = useState(0);
+
   const [selectedImageUrl, setSelectedImageUrl] = useState(img?.imgURL || '');
 
   const getAllImages = async () => {
@@ -66,71 +75,45 @@ function MemeMakerEditPage() {
   setSelectedText(id);
   };
 
-  const handleMouseDown = (e, id) => {
-  setDraggingId(id);
-  setDragStart({ x: e.clientX, y: e.clientY });
-};
-
-const handleMouseMove = (e) => {
-  if (!draggingId || !imageRef.current) return;
-
-  const deltaX = e.clientX - dragStart.x;
-  const deltaY = e.clientY - dragStart.y;
-
-  const imageRect = imageRef.current.getBoundingClientRect();
-
-  setTexts(prev => prev.map(tb => {
-    if (tb.id !== draggingId) return tb;
-
-    const newX = tb.x + (deltaX / imageRect.width) * 100;
-    const newY = tb.y + (deltaY / imageRect.height) * 100;
-
-    return { ...tb, x: newX, y: newY };
-  }));
-
-  setDragStart({ x: e.clientX, y: e.clientY }); 
-};
-
-const handleMouseUp = () => {
-  if (!draggingId) return;
-
-  const tb = texts.find(t => t.id === draggingId);
-  const prev = addStack[addStack.length - 1]?.data;
-
-  if (tb && prev && (prev.x !== tb.x || prev.y !== tb.y)) {
-    setAddStack(prevStack => [
-      ...prevStack,
-      {
-        type: 'move-text',
-        id: tb.id,
-        from: { x: prev.x, y: prev.y },
-        to: { x: tb.x, y: tb.y },
-      },
-    ]);
-  }
-
-  setDraggingId(null);
-  setDragStart(null);
-};
-
-
   const updateTextBox = (id, key, value) => {
   setTexts(prev =>
     prev.map(tb =>
       tb.id === id ? { ...tb, [key]: value } : tb
     )
   );
-};
+  };
 
   const addChat = () =>{
 
   };
   const Rotate = () =>{
-
+    setRotation(prev => prev + 90);
   };
+
   const addBlank = () =>{
-
+    setShowDirectionSelector(true);
   };
+
+  const handleDirectionClick = async (direction) => {
+    switch (direction) {
+    case 'up':
+      setPaddingUp(prev => prev + 100);
+      break;
+    case 'down':
+      setPaddingDown(prev => prev + 100);
+      break;
+    case 'left':
+      setPaddingLeft(prev => prev + 100);
+      break;
+    case 'right':
+      setPaddingRight(prev => prev + 100);
+      break;
+    default:
+      break;
+  }
+  setShowDirectionSelector(false);
+    
+};
 
   useEffect(() => {
     getAllImages();
@@ -144,6 +127,9 @@ const handleMouseUp = () => {
       return;
     }
     setSelectedText(null);
+    if (!e.target.closest('.direction-selector') && !e.target.closest('.add-blank')) {
+      setShowDirectionSelector(false);
+    }
     };
     document.addEventListener('click', handleClickOutside);
     return () => {
@@ -172,8 +158,13 @@ const handleMouseUp = () => {
         <label>크기 : 
       <input
         type="number"
-        value={texts.find(tb => tb.id === selectedText)?.fontSize || 16}
+        value={texts.find(tb => tb.id === selectedText)?.fontSize ?? ''}
         onChange={e => updateTextBox(selectedText, 'fontSize', parseInt(e.target.value))}
+        onBlur={() =>updateTextBox(selectedText,'fontSize',
+        isNaN(texts.find(tb => tb.id === selectedText)?.fontSize)? 16
+      : texts.find(tb => tb.id === selectedText)?.fontSize
+    )
+  }
       />
       </label>
       <label>색상 : 
@@ -190,8 +181,16 @@ const handleMouseUp = () => {
           {showTooltip && (
             <div className="tooltip">
                 <div className="tooltip-text">
-                  짤을 편집하는 화면입니다!<br />
-                  이미지를 스크롤해서<br />
+                  짤을 편집하는 화면입니다!<br /><br />
+                  1. 텍스트 추가<br />
+                  텍스트 박스를 하나 생성합니다.<br />
+                  2. 말풍선 추가<br />
+                  텍스트를 입력 할 수 있는 말풍선을 생성합니다.<br />
+                  3. 회전<br />
+                  사진을 90°씩 회전시킵니다.<br />
+                  4. 여백 추가<br />
+                  상하좌우 방향으로 하얀색 여백을 추가합니다.<br /><br />
+                  * 이미지를 스크롤하면<br />
                   확대/축소 할 수 있습니다.
                   </div>
               </div>
@@ -205,7 +204,15 @@ const handleMouseUp = () => {
             src={selectedImageUrl}
             alt="편집할 이미지"
             className="editable-image"
-            style={{ transform: `scale(${scale})` }}
+            style={{ transform: `scale(${scale}) rotate(${rotation}deg)`,
+              paddingTop: `${paddingUp}px`,
+              paddingBottom: `${paddingDown}px`,
+              paddingLeft: `${paddingLeft}px`,
+              paddingRight: `${paddingRight}px`,
+              backgroundColor: 'white',
+              position: 'relative',
+              display: 'inline-block',
+             }}
           />
           {texts.map(tb => (
             <div
@@ -246,25 +253,54 @@ const handleMouseUp = () => {
       </div>
 
       <div className="editor-navbar">
-        <div className="add-text">
-          <img src={addtext} alt="텍스트 추가" className="btn-text" onClick={addText}/><br/>
+        <div className="add-text" onClick={addText}>
+          <img src={addtext} alt="텍스트 추가" className="btn-text" /><br/>
           텍스트 추가
         </div>
-        <div className="add-chat">
-          <img src={addchat} alt="말풍선 추가" className="btn-chat" onClick={addChat}/><br/>
+        <div className="add-chat"  onClick={addChat}>
+          <img src={addchat} alt="말풍선 추가" className="btn-chat"/><br/>
           말풍선 추가
         </div>
-        <div className="rotate">
-          <img src={rotate} alt="회전 추가" className="btn-rotate" onClick={Rotate}/><br/>
+        <div className="rotate" onClick={Rotate}>
+          <img src={rotate} alt="회전 추가" className="btn-rotate" /><br/>
           회전
         </div>
-        <div className="add-blank">
-          <img src={addblank} alt="여백 추가" className="btn-blank" onClick={addBlank}/><br/>
+        <div className="add-blank" onClick={addBlank}>
+          <img src={addblank} alt="여백 추가" className="btn-blank" /><br/>
           여백 생성
         </div>
+
+        {showDirectionSelector && (
+        <div className="direction-selector">
+          <div className='btn-up' onClick={() => handleDirectionClick('up')}>
+          <button>
+            <img src={up} alt="상"/> 
+          </button><br/>
+          상
+          </div>
+          <div className='btn-down' onClick={() => handleDirectionClick('down')}>
+          <button>
+            <img src={down} alt="하"/> 
+          </button><br/>
+          하
+          </div>
+          <div className='btn-left' onClick={() => handleDirectionClick('left')}>
+          <button>
+            <img src={left} alt="좌"/> 
+          </button><br/>
+          좌
+          </div>
+          <div className='btn-down' onClick={() => handleDirectionClick('right')}>
+          <button>
+            <img src={right} alt="우"/> 
+          </button><br/>
+          우
+          </div>
+        </div>
+        )}
       </div>
     </div>
-  );
-  }
+    );
+  };
 
 export default MemeMakerEditPage;
