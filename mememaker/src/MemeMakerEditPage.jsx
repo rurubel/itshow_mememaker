@@ -17,6 +17,7 @@ function MemeMakerEditPage() {
   const navigate = useNavigate();
   const img = location.state?.img;
   const imageRef = useRef(null);
+  const draggingRef = useRef({ id: null, startX: 0, startY: 0 });
   const [scale, setScale] = useState(0.7);
   const [showTooltip, setShowTooltip] = useState(false);
   const [imageUrls, setImageUrls] = useState([]);
@@ -85,44 +86,48 @@ function MemeMakerEditPage() {
   };
 
 
-  const handleMouseDown = (e, id) => {
-  e.preventDefault();
-  e.stopPropagation();
-  setDraggingTextId(id);
-
-  const wrapperRect = imageRef.current.getBoundingClientRect();
-
-  const x = (e.clientX - wrapperRect.left) / wrapperRect.width * 100;
-  const y = (e.clientY - wrapperRect.top) / wrapperRect.height * 100;
-
-  // 클릭한 위치가 박스 중심이 되도록 강제 이동
-  setTexts(prev =>
-    prev.map(tb =>
-      tb.id === id ? { ...tb, x, y } : tb
-    )
-  );
-};
+  const handleMouseDown = (e, tb) => {
+    e.stopPropagation();
+    draggingRef.current = {
+      id: tb.id,
+      startX: e.clientX,
+      startY: e.clientY,
+    };
+  };
 
 
-const handleMouseMove = (e) => {
-  if (!draggingTextId || !imageRef.current) return;
+  const handleMouseMove = (e) => {
+    const { id, startX, startY } = draggingRef.current;
+    if (!id) return;
 
-  const wrapperRect = imageRef.current.getBoundingClientRect();
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
 
-  const x = (e.clientX - wrapperRect.left) / wrapperRect.width * 100;
-  const y = (e.clientY - wrapperRect.top) / wrapperRect.height * 100;
+    const wrapperRect = imageRef.current.getBoundingClientRect();
 
-  setTexts(prev =>
-    prev.map(tb =>
-      tb.id === draggingTextId ? { ...tb, x, y } : tb
-    )
-  );
-};
+    const percentX = (dx / wrapperRect.width) * 100;
+    const percentY = (dy / wrapperRect.height) * 100;
+
+    setTexts(prev =>
+      prev.map(tb =>
+        tb.id === id
+          ? {
+            ...tb,
+            x: Math.min(Math.max(tb.x + percentX, 0), 100),
+            y: Math.min(Math.max(tb.y + percentY, 0), 100),
+          }
+          : tb
+      )
+    );
+
+    draggingRef.current.startX = e.clientX;
+    draggingRef.current.startY = e.clientY;
+  };
 
 
 
   const handleMouseUp = () => {
-    setDraggingTextId(null);
+    draggingRef.current.id = null;
   };
 
 
@@ -161,30 +166,29 @@ const handleMouseMove = (e) => {
   useEffect(() => {
     getAllImages();
     const imgEl = imageRef.current;
+    if (imgEl) imgEl.addEventListener('wheel', handleWheel);
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
-    if (imgEl) imgEl.addEventListener('wheel', handleWheel);
+
     const handleClickOutside = (e) => {
       if (
         e.target.closest('.text-box') ||
-        e.target.closest('.text-edit')
-      ) {
-        return;
-      }
+        e.target.closest('.text-edit') ||
+        e.target.closest('.direction-selector') ||
+        e.target.closest('.add-blank')
+      ) return;
       setSelectedText(null);
-      if (!e.target.closest('.direction-selector') && !e.target.closest('.add-blank')) {
-        setShowDirectionSelector(false);
-      }
+      setShowDirectionSelector(false);
     };
     document.addEventListener('click', handleClickOutside);
+
     return () => {
       if (imgEl) imgEl.removeEventListener('wheel', handleWheel);
-      document.removeEventListener('click', handleClickOutside);
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('click', handleClickOutside);
     };
-
-  }, [draggingTextId, offset]);
+  }, []);
 
   return (
     <div className="edit-page">
@@ -244,56 +248,82 @@ const handleMouseMove = (e) => {
         )}
       </div>
       {img ? (
-        <div className="image-container">
-          <div className="image-wrapper">
-          <img
-              ref={imageRef}
-              src={selectedImageUrl}
-              alt="편집할 이미지"
-              className="editable-image"
-              style={{transform: `scale(${scale}) rotate(${rotation}deg)`,
-              position: 'relative',
-              display: 'inline-block',
-              paddingTop: `${paddingUp}px`,
-              paddingBottom: `${paddingDown}px`,
-              paddingLeft: `${paddingLeft}px`,
-              paddingRight: `${paddingRight}px`,
-              backgroundColor: 'white',
+  <div className="image-container">
+    <div className="image-wrapper" ref={imageRef}>
+      <img
+        src={selectedImageUrl}
+        alt="편집할 이미지"
+        className="editable-image"
+        style={{
+          transform: `scale(${scale}) rotate(${rotation}deg)`,
+          paddingTop: `${paddingUp}px`,
+          paddingBottom: `${paddingDown}px`,
+          paddingLeft: `${paddingLeft}px`,
+          paddingRight: `${paddingRight}px`,
+          backgroundColor: 'white',
+        }}
+      />
+
+      {texts.map(tb => (
+        <div
+          key={tb.id}
+          className="text-box"
+          style={{
+            position: 'absolute',
+            top: `${tb.y}%`,
+            left: `${tb.x}%`,
+            transform: 'translate(-50%, -50%)',
+            fontSize: `${tb.fontSize}px`,
+            color: tb.color,
+            userSelect: 'none',
+          }}
+          onMouseDown={(e) => handleMouseDown(e, tb)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setSelectedText(tb.id);
+          }}
+        >
+          <div
+            className="text-box-border"
+            style={{
+              border: tb.id === selectedText ? '1px dashed #aaa' : '1px solid transparent',
+              padding: '4px',
+              cursor: 'move',
+            }}
+          >
+            <div
+              contentEditable
+              suppressContentEditableWarning
+              spellCheck={false}
+              style={{
+                outline: 'none',
+                cursor: 'text',
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+                minWidth: '20px',
+              }}
+              onInput={(e) => {
+                const newText = e.currentTarget.innerText;
+                updateTextBox(tb.id, 'text', newText);
+              }}
+              onBlur={(e) => {
+                updateTextBox(tb.id, 'text', e.currentTarget.innerText);
+              }}
+              ref={(el) => {
+                if (el && el.innerText !== tb.text) {
+                  el.innerText = tb.text;
+                }
               }}
             />
-            {texts.map(tb => (
-              <div
-                key={tb.id}
-                className="text-box"
-                contentEditable
-                suppressContentEditableWarning
-                spellCheck={false}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedText(tb.id);
-                }}
-                onMouseDown={(e) => handleMouseDown(e, tb.id)}
-                style={{
-                  position: 'absolute',
-                  top: `${tb.y}%`,
-                  left: `${tb.x}%`,
-                  transform: 'translate(-50%,-50%)',
-                  fontSize: `${tb.fontSize}px`,
-                  color: tb.color,
-                  backgroundColor: 'transparent',
-                  border: tb.id === selectedText ? '1px dashed #aaa' : 'none',
-                  padding: '1px',
-                  cursor: 'move',
-                }}
-              >
-                {tb.text}
-              </div>
-            ))}
           </div>
         </div>
-      ) : (
-        <p>이미지가 없습니다.</p>
-      )}
+      ))}
+    </div>
+  </div>
+) : (
+  <p>이미지가 없습니다.</p>
+)}
+
 
       <div className="btn-group">
         <button onClick={Tohome} className="cancel-btn">취소</button>

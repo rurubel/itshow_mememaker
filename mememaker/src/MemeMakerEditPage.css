@@ -91,9 +91,11 @@
 }
 
 .image-wrapper {
+  position: relative;
   flex-grow: 1;
-  display: flex;
+  display: block;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
   overflow: visible;
 }
@@ -161,6 +163,11 @@
   outline: none;
   cursor: text;
   font-family: 'Arial', sans-serif;
+  user-select: none;
+}
+
+.text-box-border {
+  display: inline-block;
 }
 
 .text-edit {
