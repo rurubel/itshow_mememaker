@@ -5,6 +5,8 @@ import axios from 'axios';
 import help from './assets/help.png';
 import addtext from './assets/add-text.png';
 import addchat from './assets/add-chat.png';
+import imgchat from './assets/chat.png';
+import sqchat from './assets/sqchat.png';
 import rotate from './assets/rotate.png';
 import addblank from './assets/add-blank.png';
 import up from './assets/up.png';
@@ -26,6 +28,9 @@ function MemeMakerEditPage() {
   const [selectedText, setSelectedText] = useState(null);
   const [draggingTextId, setDraggingTextId] = useState(null);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [chats, setChats] = useState([]);
+  const [selectedChat, setSelectedChat] = useState(null);
+  const [showChatTypeSelector, setShowChatTypeSelector] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [showDirectionSelector, setShowDirectionSelector] = useState(false);
   const [blankDirection, setBlankDirection] = useState(null);
@@ -96,33 +101,48 @@ function MemeMakerEditPage() {
   };
 
 
-  const handleMouseMove = (e) => {
-    const { id, startX, startY } = draggingRef.current;
-    if (!id) return;
+const handleMouseMove = (e) => {
+  const { id, type, startX, startY } = draggingRef.current;
+  if (!id) return;
 
-    const dx = e.clientX - startX;
-    const dy = e.clientY - startY;
+  const dx = e.clientX - startX;
+  const dy = e.clientY - startY;
 
-    const wrapperRect = imageRef.current.getBoundingClientRect();
+  const wrapperRect = imageRef.current.getBoundingClientRect();
 
-    const percentX = (dx / wrapperRect.width) * 100;
-    const percentY = (dy / wrapperRect.height) * 100;
+  const percentX = (dx / wrapperRect.width) * 100;
+  const percentY = (dy / wrapperRect.height) * 100;
 
+  if (type === 'chat') {
+    setChats(prev =>
+      prev.map(chat =>
+        chat.id === id
+          ? {
+              ...chat,
+              x: Math.min(Math.max(chat.x + percentX, 0), 100),
+              y: Math.min(Math.max(chat.y + percentY, 0), 100),
+            }
+          : chat
+      )
+    );
+  } else {
     setTexts(prev =>
       prev.map(tb =>
         tb.id === id
           ? {
-            ...tb,
-            x: Math.min(Math.max(tb.x + percentX, 0), 100),
-            y: Math.min(Math.max(tb.y + percentY, 0), 100),
-          }
+              ...tb,
+              x: Math.min(Math.max(tb.x + percentX, 0), 100),
+              y: Math.min(Math.max(tb.y + percentY, 0), 100),
+            }
           : tb
       )
     );
+  }
 
-    draggingRef.current.startX = e.clientX;
-    draggingRef.current.startY = e.clientY;
-  };
+  draggingRef.current.startX = e.clientX;
+  draggingRef.current.startY = e.clientY;
+};
+
 
 
 
@@ -132,8 +152,45 @@ function MemeMakerEditPage() {
 
 
   const addChat = () => {
-
+    setShowChatTypeSelector(true);
   };
+
+  const updateChat = (id, key, value) => {
+    setChats(prev =>
+      prev.map(c => c.id === id ? { ...c, [key]: value } : c)
+    );
+  };
+
+  const handleChatMouseDown = (e, chat) => {
+  e.stopPropagation();
+  draggingRef.current = {
+    id: chat.id,
+    type: 'chat',
+    startX: e.clientX,
+    startY: e.clientY,
+  };
+};
+
+
+
+  const handleAddChat = (shape) => {
+    const id = Date.now() + 'chat';
+    const newChat = {
+      id,
+      shape,
+      x: 50,
+      y: 50,
+      text: '텍스트를 입력하세요.',
+      fontSize: 16,
+      color: '#000000',
+      flipped: false,
+    };
+    setChats(prev => [...prev, newChat]);
+    setAddStack(prev => [...prev, { type: 'add-chat', data: newChat }]);
+    setShowChatTypeSelector(false);
+  };
+
+
   const Rotate = () => {
     setRotation(prev => prev + 90);
   };
@@ -175,10 +232,16 @@ function MemeMakerEditPage() {
         e.target.closest('.text-box') ||
         e.target.closest('.text-edit') ||
         e.target.closest('.direction-selector') ||
-        e.target.closest('.add-blank')
+        e.target.closest('.add-blank') ||
+        e.target.closest('.chat') ||
+        e.target.closest('.chat-edit') ||
+        e.target.closest('.chat-selector') ||
+        e.target.closest('.add-chat')
       ) return;
       setSelectedText(null);
       setShowDirectionSelector(false);
+      setSelectedChat(null);
+      setShowChatTypeSelector(false);    
     };
     document.addEventListener('click', handleClickOutside);
 
@@ -248,81 +311,191 @@ function MemeMakerEditPage() {
         )}
       </div>
       {img ? (
-  <div className="image-container">
-    <div className="image-wrapper" ref={imageRef}>
+        <div className="image-container">
+          <div className="image-wrapper" ref={imageRef}>
+            <img
+              src={selectedImageUrl}
+              alt="편집할 이미지"
+              className="editable-image"
+              style={{
+                transform: `scale(${scale}) rotate(${rotation}deg)`,
+                paddingTop: `${paddingUp}px`,
+                paddingBottom: `${paddingDown}px`,
+                paddingLeft: `${paddingLeft}px`,
+                paddingRight: `${paddingRight}px`,
+                backgroundColor: 'white',
+              }}
+            />
+
+            {texts.map(tb => (
+              <div
+                key={tb.id}
+                className="text-box"
+                style={{
+                  position: 'absolute',
+                  top: `${tb.y}%`,
+                  left: `${tb.x}%`,
+                  transform: 'translate(-50%, -50%)',
+                  fontSize: `${tb.fontSize}px`,
+                  color: tb.color,
+                  userSelect: 'none',
+                }}
+                onMouseDown={(e) => handleMouseDown(e, tb)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedText(tb.id);
+                }}
+              >
+                <div
+                  className="text-box-border"
+                  style={{
+                    border: tb.id === selectedText ? '1px dashed #aaa' : '1px solid transparent',
+                    padding: '4px',
+                    cursor: 'move',
+                  }}
+                >
+                  <div
+                    contentEditable
+                    suppressContentEditableWarning
+                    spellCheck={false}
+                    style={{
+                      outline: 'none',
+                      cursor: 'text',
+                      whiteSpace: 'pre-wrap',
+                      wordBreak: 'break-word',
+                      minWidth: '20px',
+                    }}
+                    onInput={(e) => {
+                      const newText = e.currentTarget.innerText;
+                      updateTextBox(tb.id, 'text', newText);
+                    }}
+                    onBlur={(e) => {
+                      updateTextBox(tb.id, 'text', e.currentTarget.innerText);
+                    }}
+                    ref={(el) => {
+                      if (el && el.innerText !== tb.text) {
+                        el.innerText = tb.text;
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
+            {chats.map(chat => (
+  
+  <div
+    key={chat.id}
+    className="chat"
+    style={{
+      position: 'absolute',
+      top: `${chat.y}%`,
+      left: `${chat.x}%`,
+      transform: `translate(-50%, -50%)`,
+      userSelect: 'none',
+      cursor: 'move',
+      cursor: selectedChat === chat.id ? 'move' : 'default', // 일반 영역에서는 move
+    }}
+    onMouseDown={(e) => handleChatMouseDown(e, chat)}
+    onClick={(e) => {
+      e.stopPropagation();
+      setSelectedChat(chat.id);
+    }}
+  >
+    {/* 반전은 여기서만 적용 (텍스트는 제외) */}
+    <div
+      style={{
+        position: 'relative',
+        display: 'inline-block',
+      }}
+    >
       <img
-        src={selectedImageUrl}
-        alt="편집할 이미지"
-        className="editable-image"
+        src={chat.shape === 'circle' ? imgchat : sqchat}
+        alt="말풍선"
         style={{
-          transform: `scale(${scale}) rotate(${rotation}deg)`,
-          paddingTop: `${paddingUp}px`,
-          paddingBottom: `${paddingDown}px`,
-          paddingLeft: `${paddingLeft}px`,
-          paddingRight: `${paddingRight}px`,
-          backgroundColor: 'white',
+          position: 'absolute',
+          width: '100%',
+          height: '100%',
+          zIndex: -1,
+          transform: `scaleX(${chat.flipped ? -1 : 1})`,
         }}
       />
 
-      {texts.map(tb => (
-        <div
-          key={tb.id}
-          className="text-box"
-          style={{
-            position: 'absolute',
-            top: `${tb.y}%`,
-            left: `${tb.x}%`,
-            transform: 'translate(-50%, -50%)',
-            fontSize: `${tb.fontSize}px`,
-            color: tb.color,
-            userSelect: 'none',
-          }}
-          onMouseDown={(e) => handleMouseDown(e, tb)}
-          onClick={(e) => {
-            e.stopPropagation();
-            setSelectedText(tb.id);
-          }}
-        >
-          <div
-            className="text-box-border"
-            style={{
-              border: tb.id === selectedText ? '1px dashed #aaa' : '1px solid transparent',
-              padding: '4px',
-              cursor: 'move',
-            }}
-          >
-            <div
-              contentEditable
-              suppressContentEditableWarning
-              spellCheck={false}
-              style={{
-                outline: 'none',
-                cursor: 'text',
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-word',
-                minWidth: '20px',
-              }}
-              onInput={(e) => {
-                const newText = e.currentTarget.innerText;
-                updateTextBox(tb.id, 'text', newText);
-              }}
-              onBlur={(e) => {
-                updateTextBox(tb.id, 'text', e.currentTarget.innerText);
-              }}
-              ref={(el) => {
-                if (el && el.innerText !== tb.text) {
-                  el.innerText = tb.text;
-                }
-              }}
-            />
-          </div>
-        </div>
-      ))}
+      {/* 텍스트는 항상 정방향 유지 */}
+      <div
+        contentEditable
+        suppressContentEditableWarning
+        spellCheck={false}
+        style={{
+          outline: 'none',
+          whiteSpace: 'pre-wrap',
+          wordBreak: 'break-word',
+          width: chat.shape === 'square' ? '120px' : '200px',
+          padding: chat.shape === 'square'
+            ? chat.flipped === true ? '20px 80px 20px 20px' : '20px 20px 20px 80px'
+            : '25px 10px 30px 10px',
+          fontSize: `${chat.fontSize}px`,
+          color: chat.color,
+          textAlign: chat.shape === 'square' ? 'left' : 'center',
+          transform: 'none',
+          cursor: 'text',
+        }}
+        onInput={(e) => {
+          const newText = e.currentTarget.innerText;
+          updateChat(chat.id, 'text', newText);
+        }}
+        onBlur={(e) => updateChat(chat.id, 'text', e.currentTarget.innerText)}
+        ref={(el) => {
+          if (el && el.innerText !== chat.text) {
+            el.innerText = chat.text;
+          }
+        }}
+      />
     </div>
   </div>
-) : (
-  <p>이미지가 없습니다.</p>
-)}
+))}
+
+
+          </div>
+        </div>
+      ) : (
+        <p>이미지가 없습니다.</p>
+      )}
+
+      {showChatTypeSelector && (
+          <div className="chat-selector">
+            <div onClick={() => handleAddChat('circle')}>
+              <img src={imgchat} alt="원형 말풍선" />
+            </div>
+            <div onClick={() => handleAddChat('square')}>
+              <img src={sqchat} alt="사각형 말풍선" />
+            </div>
+          </div>
+        )}
+
+        
+
+        {selectedChat && (
+          <div className="chat-edit">
+            <label>크기 :
+              <input
+                type="number"
+                value={chats.find(c => c.id === selectedChat)?.fontSize ?? ''}
+                onChange={e => updateChat(selectedChat, 'fontSize', parseInt(e.target.value))}
+              />
+            </label>
+            <label>색상 :
+              <input
+                type="color"
+                value={chats.find(c => c.id === selectedChat)?.color ?? '#000000'}
+                onChange={e => updateChat(selectedChat, 'color', e.target.value)}
+              />
+            </label>
+            <button onClick={() => {
+              const target = chats.find(c => c.id === selectedChat);
+              updateChat(selectedChat, 'flipped', !target?.flipped);
+            }}>좌우 반전</button>
+          </div>
+        )}
 
 
       <div className="btn-group">

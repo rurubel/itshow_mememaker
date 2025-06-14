@@ -186,6 +186,98 @@
 .btn-chat{
   margin-left: 24px;
 }
+
+.chat{
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: move;
+  min-width: 150px;
+  min-height: 80px;
+  pointer-events: auto;
+}
+
+.chat div[contenteditable] {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  font-family: sans-serif;
+  text-align: center;
+  overflow-wrap: break-word;
+}
+
+.chat-edit {
+  position: fixed;
+  bottom: 20%;
+  left: 15%;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 1px solid #ccc;
+  padding: 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 1000;
+}
+
+.chat-edit label {
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chat-edit input[type="number"] {
+  width: 60px;
+}
+
+.chat-edit input[type="color"] {
+  width: 40px;
+  height: 24px;
+  border: none;
+  padding: 0;
+}
+
+.chat-edit button {
+  padding: 4px 10px;
+  font-size: 14px;
+  border: 1px solid #aaa;
+  background-color: #ffffff;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.chat-edit button:hover {
+  background-color: #e0e0e0;
+}
+
+.chat-selector {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  display: flex;
+  padding: 10px;
+
+  z-index: 2000;
+}
+
+.chat-selector img {
+  width: 100px;
+  margin-top: 10px;
+  height: auto;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
 .btn-rotate{
   margin-right: 1px;
 }
