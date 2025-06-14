@@ -117,6 +117,12 @@
   position:absolute;
 }
 
+.btn-back{
+  position: absolute;
+  margin-left: 78%;
+  margin-top: 31%;
+}
+
 .cancel-btn {
   padding: 12px 24px;
   background-color: #fff;

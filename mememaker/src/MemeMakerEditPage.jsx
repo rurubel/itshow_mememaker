@@ -13,6 +13,7 @@ import up from './assets/up.png';
 import down from './assets/down.png';
 import left from './assets/left.png';
 import right from './assets/right.png';
+import back from './assets/back.png';
 
 function MemeMakerEditPage() {
   const location = useLocation();
@@ -60,8 +61,10 @@ function MemeMakerEditPage() {
   const handleTemplateClick = (url) => {
     setSelectedImageUrl(url);
     setScale(0.7);
+    setAddStack([]);
   };
 
+  /*여기부터 add-text 관련 기능들*/
   const addText = () => {
     const id = Date.now() + 'text';
     const newTextBox = {
@@ -72,9 +75,7 @@ function MemeMakerEditPage() {
       fontSize: 16,
       color: '#000000',
     };
-
     setTexts(prev => [...prev, newTextBox]);
-
     setAddStack(prev => [...prev, { type: 'add-text', data: newTextBox }]);
   }
 
@@ -83,12 +84,19 @@ function MemeMakerEditPage() {
   };
 
   const updateTextBox = (id, key, value) => {
-    setTexts(prev =>
-      prev.map(tb =>
-        tb.id === id ? { ...tb, [key]: value } : tb
-      )
+  setTexts(prev => {
+    const oldText = prev.find(tb => tb.id === id);
+    if (oldText && oldText[key] !== value) {
+      setAddStack(stack => [...stack, {
+        type: 'update-text',
+        data: { id, prev: { [key]: oldText[key] } }
+      }]);
+    }
+    return prev.map(tb =>
+      tb.id === id ? { ...tb, [key]: value } : tb
     );
-  };
+  });
+};
 
 
   const handleMouseDown = (e, tb) => {
@@ -101,77 +109,83 @@ function MemeMakerEditPage() {
   };
 
 
-const handleMouseMove = (e) => {
-  const { id, type, startX, startY } = draggingRef.current;
-  if (!id) return;
+  const handleMouseMove = (e) => {
+    const { id, type, startX, startY } = draggingRef.current;
+    if (!id) return;
 
-  const dx = e.clientX - startX;
-  const dy = e.clientY - startY;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
 
-  const wrapperRect = imageRef.current.getBoundingClientRect();
+    const wrapperRect = imageRef.current.getBoundingClientRect();
 
-  const percentX = (dx / wrapperRect.width) * 100;
-  const percentY = (dy / wrapperRect.height) * 100;
+    const percentX = (dx / wrapperRect.width) * 100;
+    const percentY = (dy / wrapperRect.height) * 100;
 
-  if (type === 'chat') {
-    setChats(prev =>
-      prev.map(chat =>
-        chat.id === id
-          ? {
+    if (type === 'chat') {
+      setChats(prev =>
+        prev.map(chat =>
+          chat.id === id
+            ? {
               ...chat,
               x: Math.min(Math.max(chat.x + percentX, 0), 100),
               y: Math.min(Math.max(chat.y + percentY, 0), 100),
             }
-          : chat
-      )
-    );
-  } else {
-    setTexts(prev =>
-      prev.map(tb =>
-        tb.id === id
-          ? {
+            : chat
+        )
+      );
+    } else {
+      setTexts(prev =>
+        prev.map(tb =>
+          tb.id === id
+            ? {
               ...tb,
               x: Math.min(Math.max(tb.x + percentX, 0), 100),
               y: Math.min(Math.max(tb.y + percentY, 0), 100),
             }
-          : tb
-      )
-    );
-  }
+            : tb
+        )
+      );
+    }
 
-  draggingRef.current.startX = e.clientX;
-  draggingRef.current.startY = e.clientY;
-};
-
-
-
+    draggingRef.current.startX = e.clientX;
+    draggingRef.current.startY = e.clientY;
+  };
 
   const handleMouseUp = () => {
     draggingRef.current.id = null;
   };
 
+  /*여기부터 add-chat 관련 기능들*/
 
   const addChat = () => {
     setShowChatTypeSelector(true);
   };
 
   const updateChat = (id, key, value) => {
-    setChats(prev =>
-      prev.map(c => c.id === id ? { ...c, [key]: value } : c)
+  setChats(prev => {
+    const oldChat = prev.find(c => c.id === id);
+    if (oldChat && oldChat[key] !== value) {
+      setAddStack(stack => [...stack, {
+        type: 'update-chat',
+        data: { id, prev: { [key]: oldChat[key] } }
+      }]);
+    }
+    return prev.map(c =>
+      c.id === id ? { ...c, [key]: value } : c
     );
-  };
-
-  const handleChatMouseDown = (e, chat) => {
-  e.stopPropagation();
-  draggingRef.current = {
-    id: chat.id,
-    type: 'chat',
-    startX: e.clientX,
-    startY: e.clientY,
-  };
+  });
 };
 
 
+  const handleChatMouseDown = (e, chat) => {
+    e.stopPropagation();
+    draggingRef.current = {
+      id: chat.id,
+      type: 'chat',
+      startX: e.clientX,
+      startY: e.clientY,
+    };
+  };
 
   const handleAddChat = (shape) => {
     const id = Date.now() + 'chat';
@@ -190,11 +204,16 @@ const handleMouseMove = (e) => {
     setShowChatTypeSelector(false);
   };
 
-
+  /*회전*/
   const Rotate = () => {
-    setRotation(prev => prev + 90);
+    setRotation(prev => {
+      const newRotation = prev + 90;
+      setAddStack(stack => [...stack, { type: 'rotate' }]);
+      return newRotation;
+    });
   };
 
+  /*여백 추가*/
   const addBlank = () => {
     setShowDirectionSelector(true);
   };
@@ -217,7 +236,44 @@ const handleMouseMove = (e) => {
         break;
     }
     setShowDirectionSelector(false);
+    setAddStack(prev => [...prev, { type: 'add-blank', data: { direction } }]);
+  };
 
+  const Toback = () => {
+    const last = addStack.pop();
+    if (!last) return;
+
+    switch (last.type) {
+      case 'add-text':
+        setTexts(prev => prev.filter(tb => tb.id !== last.data.id));
+        break;
+      case 'add-chat':
+        setChats(prev => prev.filter(c => c.id !== last.data.id));
+        break;
+      case 'add-blank':
+        if (last.data.direction === 'up') setPaddingUp(prev => prev - 100);
+        if (last.data.direction === 'down') setPaddingDown(prev => prev - 100);
+        if (last.data.direction === 'left') setPaddingLeft(prev => prev - 100);
+        if (last.data.direction === 'right') setPaddingRight(prev => prev - 100);
+        break;
+      case 'rotate':
+        setRotation(prev => prev - 90);
+        break;
+      case 'update-text':
+        setTexts(prev =>
+          prev.map(tb => tb.id === last.data.id ? { ...tb, ...last.data.prev } : tb)
+        );
+        break;
+      case 'update-chat':
+        setChats(prev =>
+          prev.map(c => c.id === last.data.id ? { ...c, ...last.data.prev } : c)
+        );
+        break;
+      default:
+        break;
+    }
+
+    setAddStack([...addStack]);
   };
 
   useEffect(() => {
@@ -241,7 +297,7 @@ const handleMouseMove = (e) => {
       setSelectedText(null);
       setShowDirectionSelector(false);
       setSelectedChat(null);
-      setShowChatTypeSelector(false);    
+      setShowChatTypeSelector(false);
     };
     document.addEventListener('click', handleClickOutside);
 
@@ -367,6 +423,12 @@ const handleMouseMove = (e) => {
                     }}
                     onInput={(e) => {
                       const newText = e.currentTarget.innerText;
+                      if (newText !== tb.text) {
+                        setAddStack(prev => [...prev, {
+                          type: 'update-text',
+                          data: { id: tb.id, prev: { text: tb.text } }
+                        }]);
+                      }
                       updateTextBox(tb.id, 'text', newText);
                     }}
                     onBlur={(e) => {
@@ -382,77 +444,74 @@ const handleMouseMove = (e) => {
               </div>
             ))}
             {chats.map(chat => (
-  
-  <div
-    key={chat.id}
-    className="chat"
-    style={{
-      position: 'absolute',
-      top: `${chat.y}%`,
-      left: `${chat.x}%`,
-      transform: `translate(-50%, -50%)`,
-      userSelect: 'none',
-      cursor: 'move',
-      cursor: selectedChat === chat.id ? 'move' : 'default', // 일반 영역에서는 move
-    }}
-    onMouseDown={(e) => handleChatMouseDown(e, chat)}
-    onClick={(e) => {
-      e.stopPropagation();
-      setSelectedChat(chat.id);
-    }}
-  >
-    {/* 반전은 여기서만 적용 (텍스트는 제외) */}
-    <div
-      style={{
-        position: 'relative',
-        display: 'inline-block',
-      }}
-    >
-      <img
-        src={chat.shape === 'circle' ? imgchat : sqchat}
-        alt="말풍선"
-        style={{
-          position: 'absolute',
-          width: '100%',
-          height: '100%',
-          zIndex: -1,
-          transform: `scaleX(${chat.flipped ? -1 : 1})`,
-        }}
-      />
 
-      {/* 텍스트는 항상 정방향 유지 */}
-      <div
-        contentEditable
-        suppressContentEditableWarning
-        spellCheck={false}
-        style={{
-          outline: 'none',
-          whiteSpace: 'pre-wrap',
-          wordBreak: 'break-word',
-          width: chat.shape === 'square' ? '120px' : '200px',
-          padding: chat.shape === 'square'
-            ? chat.flipped === true ? '20px 80px 20px 20px' : '20px 20px 20px 80px'
-            : '25px 10px 30px 10px',
-          fontSize: `${chat.fontSize}px`,
-          color: chat.color,
-          textAlign: chat.shape === 'square' ? 'left' : 'center',
-          transform: 'none',
-          cursor: 'text',
-        }}
-        onInput={(e) => {
-          const newText = e.currentTarget.innerText;
-          updateChat(chat.id, 'text', newText);
-        }}
-        onBlur={(e) => updateChat(chat.id, 'text', e.currentTarget.innerText)}
-        ref={(el) => {
-          if (el && el.innerText !== chat.text) {
-            el.innerText = chat.text;
-          }
-        }}
-      />
-    </div>
-  </div>
-))}
+              <div
+                key={chat.id}
+                className="chat"
+                style={{
+                  position: 'absolute',
+                  top: `${chat.y}%`,
+                  left: `${chat.x}%`,
+                  transform: `translate(-50%, -50%)`,
+                  userSelect: 'none',
+                  cursor: 'move',
+                  cursor: selectedChat === chat.id ? 'move' : 'default', // 일반 영역에서는 move
+                }}
+                onMouseDown={(e) => handleChatMouseDown(e, chat)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedChat(chat.id);
+                }}
+              >
+                <div
+                  style={{
+                    position: 'relative',
+                    display: 'inline-block',
+                  }}
+                >
+                  <img
+                    src={chat.shape === 'circle' ? imgchat : sqchat}
+                    alt="말풍선"
+                    style={{
+                      position: 'absolute',
+                      width: '100%',
+                      height: '100%',
+                      zIndex: -1,
+                      transform: `scaleX(${chat.flipped ? -1 : 1})`,
+                    }}
+                  />
+                  <div
+                    contentEditable
+                    suppressContentEditableWarning
+                    spellCheck={false}
+                    style={{
+                      outline: 'none',
+                      whiteSpace: 'pre-wrap',
+                      wordBreak: 'break-word',
+                      width: chat.shape === 'square' ? '120px' : '200px',
+                      padding: chat.shape === 'square'
+                        ? chat.flipped === true ? '20px 80px 20px 20px' : '20px 20px 20px 80px'
+                        : '25px 10px 30px 10px',
+                      fontSize: `${chat.fontSize}px`,
+                      color: chat.color,
+                      textAlign: chat.shape === 'square' ? 'left' : 'center',
+                      transform: 'none',
+                      cursor: 'text',
+                    }}
+                    onInput={(e) => {
+                      const newText = e.currentTarget.innerText;
+                      updateChat(chat.id, 'text', newText);
+                    }}
+                    onBlur={(e) => updateChat(chat.id, 'text', e.currentTarget.innerText)}
+                    ref={(el) => {
+                      if (el && el.innerText !== chat.text) {
+                        el.innerText = chat.text;
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
 
 
           </div>
@@ -462,45 +521,53 @@ const handleMouseMove = (e) => {
       )}
 
       {showChatTypeSelector && (
-          <div className="chat-selector">
-            <div onClick={() => handleAddChat('circle')}>
-              <img src={imgchat} alt="원형 말풍선" />
-            </div>
-            <div onClick={() => handleAddChat('square')}>
-              <img src={sqchat} alt="사각형 말풍선" />
-            </div>
+        <div className="chat-selector">
+          <div onClick={() => handleAddChat('circle')}>
+            <img src={imgchat} alt="원형 말풍선" />
           </div>
-        )}
-
-        
-
-        {selectedChat && (
-          <div className="chat-edit">
-            <label>크기 :
-              <input
-                type="number"
-                value={chats.find(c => c.id === selectedChat)?.fontSize ?? ''}
-                onChange={e => updateChat(selectedChat, 'fontSize', parseInt(e.target.value))}
-              />
-            </label>
-            <label>색상 :
-              <input
-                type="color"
-                value={chats.find(c => c.id === selectedChat)?.color ?? '#000000'}
-                onChange={e => updateChat(selectedChat, 'color', e.target.value)}
-              />
-            </label>
-            <button onClick={() => {
-              const target = chats.find(c => c.id === selectedChat);
-              updateChat(selectedChat, 'flipped', !target?.flipped);
-            }}>좌우 반전</button>
+          <div onClick={() => handleAddChat('square')}>
+            <img src={sqchat} alt="사각형 말풍선" />
           </div>
-        )}
+        </div>
+      )}
+
+      {selectedChat && (
+        <div className="chat-edit">
+          <label>크기 :
+            <input
+              type="number"
+              value={chats.find(c => c.id === selectedChat)?.fontSize ?? ''}
+              onChange={e => updateChat(selectedChat, 'fontSize', parseInt(e.target.value))}
+            />
+          </label>
+          <label>색상 :
+            <input
+              type="color"
+              value={chats.find(c => c.id === selectedChat)?.color ?? '#000000'}
+              onChange={e => updateChat(selectedChat, 'color', e.target.value)}
+            />
+          </label>
+          <button onClick={() => {
+            const target = chats.find(c => c.id === selectedChat);
+            setAddStack(prev => [...prev, {
+              type: 'update-chat',
+              data: { id: selectedChat, prev: { flipped: target?.flipped } }
+            }]);
+            updateChat(selectedChat, 'flipped', !target?.flipped);
+          }}>
+            좌우 반전
+          </button>
+        </div>
+      )}
 
 
       <div className="btn-group">
-        <button onClick={Tohome} className="cancel-btn">취소</button>
+        <button className="cancel-btn" onClick={Tohome} >취소</button>
         <button className="confirm-btn">완성</button>
+      </div>
+
+      <div className="btn-back" onClick={Toback}>
+        <img src={back} alt="뒤로가기" />
       </div>
 
       <div className="editor-navbar">
