@@ -57,10 +57,12 @@ function MemeMakerEditPage() {
     setScale(prev => Math.min(Math.max(delta > 0 ? prev * 0.95 : prev * 1.05, 0.2), 5));
   };
 
+  
   const handleComplete = async () => {
     if (!imageRef.current) return;
 
     try {
+      
       const canvas = await html2canvas(imageRef.current, {
         useCORS: true,
       });

@@ -1,5 +1,3 @@
-// MemeMakerComplete.jsx
-
 import { useLocation, useNavigate } from 'react-router-dom';
 import './MemeMakerComplete.css';
 import download from './assets/download.png';
@@ -9,25 +7,22 @@ function MemeMakerComplete() {
   const navigate = useNavigate();
   const imageUrl = location.state?.capturedImageUrl;
 
-  const handleDownload = () => {
+  const handleDownloadClick = () => {
     if (!imageUrl) return;
-
-    fetch(imageUrl)
-      .then(res => res.blob())
-      .then(blob => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'meme.png';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-      });
+    navigate('/download', {
+      state: {
+        capturedImageUrl: imageUrl,
+      },
+    });
   };
 
-  const handleSendGmail = () => {
-    window.open('https://mail.google.com/mail/u/0/#inbox?compose=new', '_blank');
+  const handleSaveClick = () => {
+    if (!imageUrl) return;
+    navigate('/save', {
+      state: {
+        capturedImageUrl: imageUrl,
+      },
+    });
   };
 
   return (
@@ -39,12 +34,20 @@ function MemeMakerComplete() {
         <p>이미지가 없습니다.</p>
       )}
 
-        <img src={download} alt='다운로드' onClick={handleDownload} className="btn-download"></img>
-
+      <img
+        src={download}
+        alt="다운로드"
+        onClick={handleDownloadClick}
+        className="btn-download"
+      />
 
       <div className="button-group navigation">
-        <button className="btn-main" onClick={() => navigate('/')}>메인 화면으로</button>
-        <button className="btn-see" onClick={() => navigate('/see')}>다른 사람의 짤 보러가기</button>
+        <button className="btn-home" onClick={() => navigate('/')}>
+          메인 화면으로
+        </button>
+        <button className="btn-save" onClick={handleSaveClick}>
+          이 짤 업로드하기
+        </button>
       </div>
     </div>
   );
