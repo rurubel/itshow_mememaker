@@ -94,7 +94,7 @@
 .image-wrapper {
   position: relative;
   flex-grow: 1;
-  display: block;
+  display: inline-block;
   max-width: 100%;
   max-height: 100%;
   flex-direction: column;
@@ -104,12 +104,16 @@
 }
 
 .editable-image {
+  display: block;
+  width: 100%;
+  height: auto;
   margin-top: 5%;
   max-width: 50%;
   max-height: 50%;
   object-fit: contain;
   transition: transform 0.1s ease;
   cursor: zoom-in;
+  justify-content: center;
 }
 
 .resizer {

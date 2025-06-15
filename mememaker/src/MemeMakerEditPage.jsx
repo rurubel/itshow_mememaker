@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import './MemeMakerEditPage.css';
 import axios from 'axios';
+import html2canvas from 'html2canvas';
 import help from './assets/help.png';
 import addtext from './assets/add-text.png';
 import addchat from './assets/add-chat.png';
@@ -27,8 +28,6 @@ function MemeMakerEditPage() {
   const [addStack, setAddStack] = useState([]);
   const [texts, setTexts] = useState([]);
   const [selectedText, setSelectedText] = useState(null);
-  const [draggingTextId, setDraggingTextId] = useState(null);
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [chats, setChats] = useState([]);
   const [selectedChat, setSelectedChat] = useState(null);
   const [showChatTypeSelector, setShowChatTypeSelector] = useState(false);
@@ -56,6 +55,27 @@ function MemeMakerEditPage() {
     e.preventDefault();
     const delta = e.deltaY;
     setScale(prev => Math.min(Math.max(delta > 0 ? prev * 0.95 : prev * 1.05, 0.2), 5));
+  };
+
+  const handleComplete = async () => {
+    if (!imageRef.current) return;
+
+    try {
+      const canvas = await html2canvas(imageRef.current, {
+        useCORS: true,
+      });
+
+      const capturedImageUrl = canvas.toDataURL('image/png');
+
+      // MemeMakerApp에서 보낸 템플릿 정보와 캡처 이미지 둘 다 넘김
+      navigate('/complete', {
+        state: {
+          capturedImageUrl // 필요 시 다시 표시 가능
+        },
+      });
+    } catch (err) {
+      console.error('캡처 실패:', err);
+    }
   };
 
   const handleTemplateClick = (url) => {
@@ -617,7 +637,7 @@ function MemeMakerEditPage() {
 
       <div className="btn-group">
         <button className="cancel-btn" onClick={Tohome} >취소</button>
-        <button className="confirm-btn">완성</button>
+        <button className="confirm-btn" onClick={handleComplete}>완성</button>
       </div>
 
       <div className="btn-back" onClick={Toback}>
@@ -674,5 +694,6 @@ function MemeMakerEditPage() {
     </div>
   );
 };
+
 
 export default MemeMakerEditPage;
