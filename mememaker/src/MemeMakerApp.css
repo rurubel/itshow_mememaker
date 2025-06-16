@@ -123,17 +123,17 @@ body, html, #root {
 }
 
 .make-page1 {
-  height:84vh;
+  height:86vh;
   background: white;
   padding: 50px 20px;
   text-align: center;
 }
 
 .second_text {
+  margin-top: 30px;
   font-size: 2.5em;
   color: #634848;
   font-weight: bold;
-  margin-bottom: 50px;
   line-height: 1.6;
 }
 
@@ -174,7 +174,6 @@ body, html, #root {
   font-size: 30px;
   color: #413333;
   text-align: right;
-  margin-top: 1%;
   margin-left: 88%;
   position: absolute;
   cursor: pointer;

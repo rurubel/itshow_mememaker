@@ -57,12 +57,12 @@ function MemeMakerEditPage() {
     setScale(prev => Math.min(Math.max(delta > 0 ? prev * 0.95 : prev * 1.05, 0.2), 5));
   };
 
-  
+
   const handleComplete = async () => {
     if (!imageRef.current) return;
 
     try {
-      
+
       const canvas = await html2canvas(imageRef.current, {
         useCORS: true,
       });
@@ -462,134 +462,136 @@ function MemeMakerEditPage() {
                 backgroundColor: 'white',
               }}
             />
-
             {texts.map(tb => (
-  <div
-    key={tb.id}
-    className="text-box"
-    style={{
-      position: 'absolute',
-      top: `${tb.y}%`,
-      left: `${tb.x}%`,
-      transform: 'translate(-50%, -50%)',
-      fontSize: `${tb.fontSize}px`,
-      color: tb.color,
-      userSelect: 'none',
-      minWidth: '60px',
-      minHeight: '30px',
-    }}
-    onMouseDown={(e) => handleMouseDown(e, tb)}
-    onClick={(e) => {
-      e.stopPropagation();
-      setSelectedText(tb.id);
-    }}
-  >
-    <div
-      className="text-box-border"
-      style={{
-        border: tb.id === selectedText ? '1px dashed #aaa' : '1px solid transparent',
-        padding: '4px',
-        width: '100%',
-        height: '100%',
-        cursor: 'move',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        textAlign: 'center',
-      }}
-    >
-      <div
-        contentEditable
-        suppressContentEditableWarning
-        spellCheck={false}
-        style={{
-          outline: 'none',
-          whiteSpace: 'pre-wrap',
-          wordBreak: 'break-word',
-          cursor: 'text',
-          width: '100%',
-          height: '100%',
-        }}
-        onInput={(e) => {
-          const newText = e.currentTarget.innerText;
-          updateTextBox(tb.id, 'text', newText);
-        }}
-        ref={(el) => {
-          if (el && el.innerText !== tb.text) el.innerText = tb.text;
-        }}
-      />
-    </div>
-  </div>
-))}
-{chats.map(chat => (
-  <div
-    key={chat.id}
-    className="chat"
-    style={{
-      position: 'absolute',
-      top: `${chat.y}%`,
-      left: `${chat.x}%`,
-      transform: `translate(-50%, -50%)`,
-      userSelect: 'none',
-      width: chat.width || 60,
-      height: chat.height || 30,
-      cursor: selectedChat === chat.id ? 'move' : 'default',
-    }}
-    onMouseDown={(e) => handleChatMouseDown(e, chat)}
-    onClick={(e) => {
-      e.stopPropagation();
-      setSelectedChat(chat.id);
-    }}
-  >
-    <div
-      style={{
-        position: 'relative',
-        width: '100%',
-        height: '100%',
-      }}
-    >
-      <img
-        src={chat.shape === 'circle' ? imgchat : sqchat}
-        alt="말풍선"
-        style={{
-          position: 'absolute',
-          width: '100%',
-          height: '100%',
-          zIndex: -1,
-          transform: `scaleX(${chat.flipped ? -1 : 1})`,
-        }}
-      />
-      <div
-        contentEditable
-        suppressContentEditableWarning
-        spellCheck={false}
-        style={{
-          display: 'flex',
-          margin: chat.shape === 'square' ?
-          chat.flipped === true ? '10% 0px 0px 0px' : '10% 0px 0px 20%':
-          '9% 0px 0px 8%',
-          outline: 'none',
-          whiteSpace: 'pre-wrap',
-          wordBreak: 'break-word',
-          width: '100%',
-          height: '100%',
-          padding: '10px',
-          fontSize: `${chat.fontSize}px`,
-          color: chat.color,
-        }}
-        onInput={(e) => {
-          const newText = e.currentTarget.innerText;
-          updateChat(chat.id, 'text', newText);
-        }}
-        onBlur={(e) => updateChat(chat.id, 'text', e.currentTarget.innerText)}
-        ref={(el) => {
-          if (el && el.innerText !== chat.text) el.innerText = chat.text;
-        }}
-      />
-    </div>
-     {Resize(chat.id, 'chat', updateChat, chats, selectedChat, setAddStack)}
-  </div>
-))}
+              <div
+                key={tb.id}
+                className="text-box"
+                style={{
+                  position: 'absolute',
+                  top: `${tb.y}%`,
+                  left: `${tb.x}%`,
+                  transform: 'translate(-50%, -50%)',
+                  fontSize: `${tb.fontSize}px`,
+                  color: tb.color,
+                  userSelect: 'none',
+                  minWidth: '60px',
+                  minHeight: '30px',
+                }}
+                onMouseDown={(e) => handleMouseDown(e, tb)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedText(tb.id);
+                }}
+              >
+                <div
+                  className="text-box-border"
+                  style={{
+                    border: tb.id === selectedText ? '1px dashed #aaa' : '1px solid transparent',
+                    padding: '4px',
+                    width: '100%',
+                    height: '100%',
+                    cursor: 'move',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    textAlign: 'center',
+                  }}
+                >
+                  <div
+                    contentEditable
+                    suppressContentEditableWarning
+                    spellCheck={false}
+                    style={{
+                      outline: 'none',
+                      whiteSpace: 'pre-wrap',
+                      wordBreak: 'break-word',
+                      cursor: 'text',
+                      width: '100%',
+                      height: '100%',
+                    }}
+                    onInput={(e) => {
+                      const newText = e.currentTarget.innerText;
+                      updateTextBox(tb.id, 'text', newText);
+                    }}
+                    ref={(el) => {
+                      if (el && el.innerText !== tb.text) el.innerText = tb.text;
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
+            {chats.map(chat => (
+              <div
+                key={chat.id}
+                className="chat"
+                style={{
+                  position: 'absolute',
+                  top: `${chat.y}%`,
+                  left: `${chat.x}%`,
+                  transform: `translate(-50%, -50%)`,
+                  userSelect: 'none',
+                  width: chat.width || 60,
+                  height: chat.height || 30,
+                  cursor: selectedChat === chat.id ? 'move' : 'default',
+                }}
+                onMouseDown={(e) => handleChatMouseDown(e, chat)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedChat(chat.id);
+                }}
+              >
+                <div
+                  style={{
+                    position: 'relative',
+                    width: '100%',
+                    height: '100%',
+                  }}
+                >
+                  <img
+                    src={chat.shape === 'circle' ? imgchat : sqchat}
+                    alt="말풍선"
+                    style={{
+                      position: 'absolute',
+                      width: '100%',
+                      height: '100%',
+                      zIndex: -1,
+                      transform: `scaleX(${chat.flipped ? -1 : 1})`,
+                    }}
+                  />
+                  <div
+                    contentEditable
+                    suppressContentEditableWarning
+                    spellCheck={false}
+                    style={{
+                      display: 'flex',
+                      margin: chat.shape === 'square' ?
+                        chat.flipped === true ? '10% 0px 0px 0px' : '10% 0px 0px 20%' :
+                        '9% 0px 0px 8%',
+                      outline: 'none',
+                      whiteSpace: 'pre-wrap',
+                      wordBreak: 'break-word',
+                      width: '100%',
+                      height: '100%',
+                      padding: '10px',
+                      fontSize: `${chat.fontSize}px`,
+                      color: chat.color,
+                    }}
+                    onInput={(e) => {
+                      const newText = e.currentTarget.innerText;
+                      updateChat(chat.id, 'text', newText);
+                    }}
+                    onBlur={(e) => updateChat(chat.id, 'text', e.currentTarget.innerText)}
+                    ref={(el) => {
+                      if (el && el.innerText !== chat.text) el.innerText = chat.text;
+                    }}
+                  />
+                </div>
+                {Resize(chat.id, 'chat', updateChat, chats, selectedChat, setAddStack)}
+              </div>
+            ))}
+
+            
+            
           </div>
         </div>
       ) : (

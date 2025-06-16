@@ -81,26 +81,21 @@
 }
 
 .image-container {
-  flex-grow: 1;
+  flex: 1;
   margin: 5% auto 0 auto;
   max-height: 50vh;
-  overflow: auto;
   display: flex;
-  overflow: hidden;
+  overflow: auto;
   justify-content: center;
   align-items: center;
 }
 
 .image-wrapper {
   position: relative;
-  flex-grow: 1;
-  display: inline-block;
-  max-width: 100%;
-  max-height: 100%;
-  flex-direction: column;
+  display: flex;
+  overflow: auto;
   justify-content: center;
   align-items: center;
-  overflow: visible;
 }
 
 .editable-image {
@@ -114,6 +109,7 @@
   transition: transform 0.1s ease;
   cursor: zoom-in;
   justify-content: center;
+  align-items: center;
 }
 
 .resizer {
@@ -138,7 +134,7 @@
 
 .btn-back{
   position: absolute;
-  margin-left: 78%;
+  margin-left: 68%;
   margin-top: 31%;
 }
 

@@ -108,7 +108,7 @@ function MemeMakerApp() {
   };
 
   const ToCategoryPage = () => {
-  window.scrollTo({ top: 2405, behavior: 'smooth' });
+  window.scrollTo({ top: 2430, behavior: 'smooth' });
 };
 
   return (
