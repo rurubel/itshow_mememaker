@@ -5,24 +5,28 @@ import download from './assets/download.png';
 function MemeMakerComplete() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { img } = location.state || {};
+  const {
+  capturedImageUrl,
+  temId,
+  imgURL,
+  categori,
+} = img || {};
   const imageUrl = location.state?.capturedImageUrl;
 
   const handleDownloadClick = () => {
+    console.log(imageUrl);
     if (!imageUrl) return;
     navigate('/download', {
-      state: {
-        capturedImageUrl: imageUrl,
-      },
-    });
+      state: {img }},
+    );
   };
 
   const handleSaveClick = () => {
     if (!imageUrl) return;
-    navigate('/save', {
-      state: {
-        capturedImageUrl: imageUrl,
-      },
-    });
+    navigate('/feed', {
+      state: {img }},
+    );
   };
 
   return (

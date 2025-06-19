@@ -57,28 +57,51 @@ function MemeMakerEditPage() {
     setScale(prev => Math.min(Math.max(delta > 0 ? prev * 0.95 : prev * 1.05, 0.2), 5));
   };
 
+  const capturedImageUrl = html2canvas.toDataURL('image/png');
 
+    // 원본 템플릿 정보를 함께 포함한 객체
   const handleComplete = async () => {
-    if (!imageRef.current) return;
+  if (!imageRef.current) return;
 
-    try {
+  const imgs = imageRef.current.querySelectorAll('img');
+  try {
+    await Promise.all(
+      Array.from(imgs).map((img) => {
+        if (!img.complete) {
+          return new Promise((resolve, reject) => {
+            img.onload = () => resolve(true);
+            img.onerror = reject;
+          });
+        } else if (img.decode) {
+          return img.decode();
+        }
+        return Promise.resolve(true);
+      })
+    );
 
-      const canvas = await html2canvas(imageRef.current, {
-        useCORS: true,
-      });
+    const canvas = await html2canvas(imageRef.current, {
+      useCORS: true,
+      allowTaint: false,
+      backgroundColor: null,
+    });
 
-      const capturedImageUrl = canvas.toDataURL('image/png');
+    const capturedImageUrl = canvas.toDataURL('image/png');
 
-      // MemeMakerApp에서 보낸 템플릿 정보와 캡처 이미지 둘 다 넘김
-      navigate('/complete', {
-        state: {
-          capturedImageUrl // 필요 시 다시 표시 가능
-        },
-      });
-    } catch (err) {
-      console.error('캡처 실패:', err);
-    }
-  };
+    // 원본 템플릿 정보를 함께 포함한 객체
+    const image = {
+      capturedImageUrl,
+      temId: img.temId,
+      imgURL: img.imgURL,
+      categori: img.categori, // 선택값이면 state나 form에서 가져와도 됨
+    };
+
+
+
+    navigate('/complete', { state: { image } });
+  } catch (err) {
+    console.error('캡처 실패:', err);
+  }
+};
 
   const handleTemplateClick = (url) => {
     setSelectedImageUrl(url);
