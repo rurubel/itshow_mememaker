@@ -24,11 +24,8 @@ const MemeMakerSee = () => {
                     <span
                         className="see-link"
                         onClick={ToMakePage}>
-                        만들기
-                    </span>
-                    /
-                    <span className="see-link active">
-                        다른 사람의 짤
+                        만들기</span> /
+                    <span className="see-link active"> 다른 사람의 짤
                     </span>
                 </div>
 

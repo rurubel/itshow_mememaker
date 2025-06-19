@@ -10,7 +10,7 @@ import axios from 'axios';
 function MemeMakerApp() {
   const [showScrollHint, setShowScrollHint] = useState(true);
   const [toMakePage, setMakePage] = useState(false);
-  //const [toSeePage, setSeePage] = useState(false);
+  const [toSeePage, setSeePage] = useState(false);
   const [ranimageUrls, setranImageUrls] = useState([]);
   const [imageUrls, setImageUrls] = useState([]);
   const [uploadedImage, setUploadedImage] = useState(null);
@@ -40,7 +40,34 @@ function MemeMakerApp() {
   };
 
   const ToEditPage = (img) => {
+  // blob: URL이면 FileReader로 base64 변환
+  if (img.imgURL.startsWith('blob:')) {
+    fetch(img.imgURL)
+      .then(res => res.blob())
+      .then(blob => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64DataUrl = reader.result;
+          const updatedImg = {
+            ...img,
+            imgURL: base64DataUrl, // blob: → base64 대체
+          };
+          navigate('/edit', { state: { img: updatedImg } });
+        };
+        reader.readAsDataURL(blob);
+      })
+      .catch(err => {
+        console.error('이미지 변환 실패:', err);
+        navigate('/edit', { state: { img } }); // 실패 시 원본이라도 넘김
+      });
+  } else {
+    // blob이 아닌 경우 그대로 전달
     navigate('/edit', { state: { img } });
+  }
+};
+
+  const ToSeePage = () => {
+    navigate('/see');
   }
 
   const upload = () => {
@@ -120,8 +147,7 @@ function MemeMakerApp() {
             className={`nav-link ${toMakePage ? 'active' : ''}`}
             onClick={ToMakePage}>
             만들기
-          </span>
-          <span className="nav-link"> / 다른 사람의 짤</span>
+          </span> / <span className="nav-link"  onClick={ToSeePage}>다른 사람의 짤</span>
         </div>
       </nav>
 

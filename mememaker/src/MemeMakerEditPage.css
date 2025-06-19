@@ -194,12 +194,13 @@
 
 .text-edit {
   position: fixed;
-  bottom: 20%;
+  bottom: 17%;
   left: 50%;
   transform: translateX(-50%);
   background: white;
   padding: 8px 12px;
   border: 1px solid #ccc;
+  background-color: rgba(255, 255, 255);
   border-radius: 6px;
   display: flex;
   gap: 10px;
@@ -233,8 +234,8 @@
 
 .chat-edit {
   position: fixed;
-  bottom: 20%;
-  left: 15%;
+  bottom: 23%;
+  left: 25%;
   background-color: rgba(255, 255, 255, 0.9);
   border: 1px solid #ccc;
   padding: 12px;

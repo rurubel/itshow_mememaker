@@ -57,93 +57,93 @@ function MemeMakerEditPage() {
     setScale(prev => Math.min(Math.max(delta > 0 ? prev * 0.95 : prev * 1.05, 0.2), 5));
   };
 
-  const trimTransparentPixels = (dataUrl)=> {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return resolve(dataUrl);
+  const trimTransparentPixels = (dataUrl) => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return resolve(dataUrl);
 
-      canvas.width = img.width;
-      canvas.height = img.height;
-      ctx.drawImage(img, 0, 0);
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
 
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const pixels = imageData.data;
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const pixels = imageData.data;
 
-      let top = null, bottom = null, left = null, right = null;
+        let top = null, bottom = null, left = null, right = null;
 
-      for (let y = 0; y < canvas.height; y++) {
-        for (let x = 0; x < canvas.width; x++) {
-          const index = (y * canvas.width + x) * 4;
-          const alpha = pixels[index + 3];
-          if (alpha !== 0) {
-            if (top === null) top = y;
-            bottom = y;
-            if (left === null || x < left) left = x;
-            if (right === null || x > right) right = x;
+        for (let y = 0; y < canvas.height; y++) {
+          for (let x = 0; x < canvas.width; x++) {
+            const index = (y * canvas.width + x) * 4;
+            const alpha = pixels[index + 3];
+            if (alpha !== 0) {
+              if (top === null) top = y;
+              bottom = y;
+              if (left === null || x < left) left = x;
+              if (right === null || x > right) right = x;
+            }
           }
         }
-      }
 
-      if (top === null || bottom === null || left === null || right === null) {
-        // 전부 투명
-        return resolve(dataUrl);
-      }
+        if (top === null || bottom === null || left === null || right === null) {
+          // 전부 투명
+          return resolve(dataUrl);
+        }
 
-      const trimmedWidth = right - left + 1;
-      const trimmedHeight = bottom - top + 1;
+        const trimmedWidth = right - left + 1;
+        const trimmedHeight = bottom - top + 1;
 
-      const trimmedCanvas = document.createElement('canvas');
-      trimmedCanvas.width = trimmedWidth;
-      trimmedCanvas.height = trimmedHeight;
+        const trimmedCanvas = document.createElement('canvas');
+        trimmedCanvas.width = trimmedWidth;
+        trimmedCanvas.height = trimmedHeight;
 
-      const trimmedCtx = trimmedCanvas.getContext('2d');
-      if (!trimmedCtx) return resolve(dataUrl);
+        const trimmedCtx = trimmedCanvas.getContext('2d');
+        if (!trimmedCtx) return resolve(dataUrl);
 
-      trimmedCtx.drawImage(canvas, left, top, trimmedWidth, trimmedHeight, 0, 0, trimmedWidth, trimmedHeight);
-      resolve(trimmedCanvas.toDataURL('image/png'));
-    };
-    img.src = dataUrl;
-  });
-};
+        trimmedCtx.drawImage(canvas, left, top, trimmedWidth, trimmedHeight, 0, 0, trimmedWidth, trimmedHeight);
+        resolve(trimmedCanvas.toDataURL('image/png'));
+      };
+      img.src = dataUrl;
+    });
+  };
 
   const handleComplete = async () => {
-  if (!imageRef.current) return;
+    if (!imageRef.current) return;
 
-  const node = imageRef.current;
-  const originalStyle = node.getAttribute('style');
+    const node = imageRef.current;
+    const originalStyle = node.getAttribute('style');
 
-  // 스케일을 실제 DOM 크기에 반영
-  const scaledWidth = node.offsetWidth * scale * 2.0;
-  const scaledHeight = node.offsetHeight * scale * 2.0;
+    // 스케일을 실제 DOM 크기에 반영
+    const scaledWidth = node.offsetWidth * scale * 2.0;
+    const scaledHeight = node.offsetHeight * scale * 2.0;
 
-  node.style.transform = '';
-  node.style.width = `${scaledWidth}px`;
-  node.style.height = `${scaledHeight}px`;
-  node.style.transformOrigin = 'top left';
+    node.style.transform = '';
+    node.style.width = `${scaledWidth}px`;
+    node.style.height = `${scaledHeight}px`;
+    node.style.transformOrigin = 'top left';
 
-  try {
-    const dataUrl = await toPng(node, {
-      cacheBust: true,
-    });
+    try {
+      const dataUrl = await toPng(node, {
+        cacheBust: true,
+      });
 
-    // 스타일 복원
-    if (originalStyle) node.setAttribute('style', originalStyle);
+      // 스타일 복원
+      if (originalStyle) node.setAttribute('style', originalStyle);
 
-    const trimmedUrl = await trimTransparentPixels(dataUrl);
+      const trimmedUrl = await trimTransparentPixels(dataUrl);
 
-    navigate('/complete', {
-      state: {
-        capturedImageUrl: trimmedUrl,
-      },
-    });
-  } catch (err) {
-    console.error('캡처 실패:', err);
-    if (originalStyle) node.setAttribute('style', originalStyle);
-  }
-};
+      navigate('/complete', {
+        state: {
+          capturedImageUrl: trimmedUrl,
+        },
+      });
+    } catch (err) {
+      console.error('캡처 실패:', err);
+      if (originalStyle) node.setAttribute('style', originalStyle);
+    }
+  };
 
 
 
@@ -490,6 +490,15 @@ function MemeMakerEditPage() {
               onChange={e => updateTextBox(selectedText, 'color', e.target.value)}
             />
           </label>
+          <button
+          style={{ backgroundColor: 'white', border: '1px solid rgb(127, 127, 127)'}}
+            onClick={() => {
+              setTexts(prev => prev.filter(tb => tb.id !== selectedText));
+              setSelectedText(null);
+            }}
+          >
+            X
+          </button>
         </div>
       )}
       <div className="help-item" onMouseEnter={() => setShowTooltip(true)} onMouseLeave={() => setShowTooltip(false)}>
@@ -662,9 +671,6 @@ function MemeMakerEditPage() {
                 {Resize(chat.id, 'chat', updateChat, chats, selectedChat, setAddStack)}
               </div>
             ))}
-
-
-
           </div>
         </div>
       ) : (
@@ -708,6 +714,15 @@ function MemeMakerEditPage() {
           }}>
             좌우 반전
           </button>
+          <button
+            onClick={() => {
+              setChats(prev => prev.filter(chat => chat.id !== selectedChat));
+              setSelectedChat(null);
+            }}
+          >
+            X
+          </button>
+
         </div>
       )}
 
