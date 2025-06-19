@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { toPng } from 'html-to-image';
 import './MemeMakerEditPage.css';
 import axios from 'axios';
-import html2canvas from 'html2canvas';
 import help from './assets/help.png';
 import addtext from './assets/add-text.png';
 import addchat from './assets/add-chat.png';
@@ -57,51 +57,95 @@ function MemeMakerEditPage() {
     setScale(prev => Math.min(Math.max(delta > 0 ? prev * 0.95 : prev * 1.05, 0.2), 5));
   };
 
-  const capturedImageUrl = html2canvas.toDataURL('image/png');
+  const trimTransparentPixels = (dataUrl)=> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return resolve(dataUrl);
 
-    // 원본 템플릿 정보를 함께 포함한 객체
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const pixels = imageData.data;
+
+      let top = null, bottom = null, left = null, right = null;
+
+      for (let y = 0; y < canvas.height; y++) {
+        for (let x = 0; x < canvas.width; x++) {
+          const index = (y * canvas.width + x) * 4;
+          const alpha = pixels[index + 3];
+          if (alpha !== 0) {
+            if (top === null) top = y;
+            bottom = y;
+            if (left === null || x < left) left = x;
+            if (right === null || x > right) right = x;
+          }
+        }
+      }
+
+      if (top === null || bottom === null || left === null || right === null) {
+        // 전부 투명
+        return resolve(dataUrl);
+      }
+
+      const trimmedWidth = right - left + 1;
+      const trimmedHeight = bottom - top + 1;
+
+      const trimmedCanvas = document.createElement('canvas');
+      trimmedCanvas.width = trimmedWidth;
+      trimmedCanvas.height = trimmedHeight;
+
+      const trimmedCtx = trimmedCanvas.getContext('2d');
+      if (!trimmedCtx) return resolve(dataUrl);
+
+      trimmedCtx.drawImage(canvas, left, top, trimmedWidth, trimmedHeight, 0, 0, trimmedWidth, trimmedHeight);
+      resolve(trimmedCanvas.toDataURL('image/png'));
+    };
+    img.src = dataUrl;
+  });
+};
+
   const handleComplete = async () => {
   if (!imageRef.current) return;
 
-  const imgs = imageRef.current.querySelectorAll('img');
-  try {
-    await Promise.all(
-      Array.from(imgs).map((img) => {
-        if (!img.complete) {
-          return new Promise((resolve, reject) => {
-            img.onload = () => resolve(true);
-            img.onerror = reject;
-          });
-        } else if (img.decode) {
-          return img.decode();
-        }
-        return Promise.resolve(true);
-      })
-    );
+  const node = imageRef.current;
+  const originalStyle = node.getAttribute('style');
 
-    const canvas = await html2canvas(imageRef.current, {
-      useCORS: true,
-      allowTaint: false,
-      backgroundColor: null,
+  // 스케일을 실제 DOM 크기에 반영
+  const scaledWidth = node.offsetWidth * scale * 2.0;
+  const scaledHeight = node.offsetHeight * scale * 2.0;
+
+  node.style.transform = '';
+  node.style.width = `${scaledWidth}px`;
+  node.style.height = `${scaledHeight}px`;
+  node.style.transformOrigin = 'top left';
+
+  try {
+    const dataUrl = await toPng(node, {
+      cacheBust: true,
     });
 
-    const capturedImageUrl = canvas.toDataURL('image/png');
+    // 스타일 복원
+    if (originalStyle) node.setAttribute('style', originalStyle);
 
-    // 원본 템플릿 정보를 함께 포함한 객체
-    const image = {
-      capturedImageUrl,
-      temId: img.temId,
-      imgURL: img.imgURL,
-      categori: img.categori, // 선택값이면 state나 form에서 가져와도 됨
-    };
+    const trimmedUrl = await trimTransparentPixels(dataUrl);
 
-
-
-    navigate('/complete', { state: { image } });
+    navigate('/complete', {
+      state: {
+        capturedImageUrl: trimmedUrl,
+      },
+    });
   } catch (err) {
     console.error('캡처 실패:', err);
+    if (originalStyle) node.setAttribute('style', originalStyle);
   }
 };
+
+
 
   const handleTemplateClick = (url) => {
     setSelectedImageUrl(url);
@@ -185,7 +229,6 @@ function MemeMakerEditPage() {
   const handleTextClick = (id) => {
     setSelectedText(id);
   };
-
   const updateTextBox = (id, key, value) => {
     setTexts(prev => {
       const oldText = prev.find(tb => tb.id === id);
@@ -471,13 +514,20 @@ function MemeMakerEditPage() {
       </div>
       {img ? (
         <div className="image-container">
-          <div className="image-wrapper" ref={imageRef}>
+          <div
+            className="image-wrapper"
+            ref={imageRef}
+            style={{
+              transform: `scale(${scale})`,
+              transformOrigin: 'center',
+            }}
+          >
             <img
               src={selectedImageUrl}
               alt="편집할 이미지"
               className="editable-image"
               style={{
-                transform: `scale(${scale}) rotate(${rotation}deg)`,
+                transform: `rotate(${rotation}deg)`,
                 paddingTop: `${paddingUp}px`,
                 paddingBottom: `${paddingDown}px`,
                 paddingLeft: `${paddingLeft}px`,
@@ -613,8 +663,8 @@ function MemeMakerEditPage() {
               </div>
             ))}
 
-            
-            
+
+
           </div>
         </div>
       ) : (

@@ -6,6 +6,7 @@ const db = require('../db');
 const uuid = require('uuid').v4;
 const nodemailer = require('nodemailer');
 
+
 router.get('/random', async (req, res) => {
   try {
     const [rows] = await db.query(
@@ -27,6 +28,7 @@ router.get('/all', async (req, res) => {
     res.status(500).json({ error: '전체 데이터 로딩 실패' });
   }
 });
+
 
 router.get('/see', async (req, res) => {
   try {

@@ -10,7 +10,7 @@ import axios from 'axios';
 function MemeMakerApp() {
   const [showScrollHint, setShowScrollHint] = useState(true);
   const [toMakePage, setMakePage] = useState(false);
-  const [toSeePage, setSeePage] = useState(false);
+  //const [toSeePage, setSeePage] = useState(false);
   const [ranimageUrls, setranImageUrls] = useState([]);
   const [imageUrls, setImageUrls] = useState([]);
   const [uploadedImage, setUploadedImage] = useState(null);
@@ -111,10 +111,6 @@ function MemeMakerApp() {
   window.scrollTo({ top: 2430, behavior: 'smooth' });
 };
 
-  const ToSeePage=()=>{
-    navigate('/see');
-  }
-
   return (
     <div className="MemeMakerApp">
       <nav className="navbar">
@@ -125,11 +121,7 @@ function MemeMakerApp() {
             onClick={ToMakePage}>
             만들기
           </span>
-          /
-          <span className="nav-link"
-              onClick={ToSeePage}>
-              다른 사람의 짤
-              </span>
+          <span className="nav-link"> / 다른 사람의 짤</span>
         </div>
       </nav>
 

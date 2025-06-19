@@ -11,7 +11,7 @@
     color: #574141;
     font-size: 40px;
     font-style: bold;
-    margin-bottom: 5%;
+    margin-bottom: 7%;
 }
 
 
@@ -20,12 +20,15 @@
   max-height: 60vh;
   border-radius: 8px;
   margin-bottom: 7%;
+  border-radius: 8px;
+  border: 10px solid #ded1d1;
 }
 
 .email-input {
   padding: 12px;
   font-size: 16px;
   width: 300px;
+  margin-top: 10px;
   margin-bottom: 15px;
   border-radius: 8px;
   border: 1px solid #ccc;
